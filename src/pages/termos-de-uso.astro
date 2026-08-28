@@ -1,0 +1,144 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE } from '../config/site';
+
+const lastUpdated = '28 de agosto de 2026';
+---
+
+<BaseLayout
+  title="Termos de Uso | Malica"
+  description="Termos de uso do site e da comunidade Malica."
+  canonicalPath="/termos-de-uso"
+>
+  <Header />
+  <main class="legal">
+    <div class="container legal__inner">
+      <a href="/" class="legal__back">← Voltar para a página inicial</a>
+
+      <h1>Termos de Uso</h1>
+      <p class="legal__updated">Última atualização: {lastUpdated}</p>
+
+      <section>
+        <h2>1. Aceitação</h2>
+        <p>
+          Ao acessar o site da Malica, você concorda com estes Termos de Uso. Se
+          não concordar, recomendamos não utilizar o site.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Sobre o serviço</h2>
+        <p>
+          A Malica é uma comunidade gratuita que compartilha ofertas, cupons e
+          achadinhos relacionados a bebês, crianças, gestantes e mamães. As
+          informações são disponibilizadas de forma informativa e podem ser
+          alteradas a qualquer momento.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Preços, promoções e disponibilidade</h2>
+        <p>
+          Preços, estoque, cupons e condições promocionais podem mudar sem aviso
+          prévio e variam conforme cada loja ou marketplace. Recomendamos sempre
+          verificar as condições finais no site da loja antes de concluir uma
+          compra.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. Links de afiliados</h2>
+        <p>
+          Alguns links divulgados pela Malica podem ser links de afiliados. Ao
+          comprar através deles, podemos receber uma comissão, sem nenhum custo
+          adicional para você. Isso nos ajuda a manter a comunidade ativa.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Propriedade intelectual</h2>
+        <p>
+          A identidade visual, nome Malica, mascote e conteúdos produzidos pela
+          marca são protegidos por direitos autorais. É proibida a reprodução não
+          autorizada.
+        </p>
+      </section>
+
+      <section>
+        <h2>6. Limitação de responsabilidade</h2>
+        <p>
+          A Malica não se responsabiliza por produtos, serviços, entregas ou
+          políticas de lojas terceiras. Marcas e marketplaces citados são
+          independentes e não patrocinam a Malica.
+        </p>
+      </section>
+
+      <section>
+        <h2>7. Contato</h2>
+        <p>
+          Dúvidas sobre estes termos podem ser enviadas para{' '}
+          <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>.
+        </p>
+      </section>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .legal {
+    padding-block: 1rem 2rem;
+  }
+
+  .legal__inner {
+    max-width: 40rem;
+  }
+
+  .legal__back {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: var(--malica-text-muted);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+  }
+
+  .legal__back:hover {
+    color: var(--malica-marrom-ameixa);
+    text-decoration: underline;
+  }
+
+  .legal h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .legal__updated {
+    font-size: 0.875rem;
+    color: var(--malica-text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .legal section {
+    margin-bottom: 1.75rem;
+  }
+
+  .legal h2 {
+    font-family: var(--malica-font-body);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin-bottom: 0.625rem;
+  }
+
+  .legal p {
+    font-size: 0.9375rem;
+    color: var(--malica-text-muted);
+    line-height: 1.65;
+    margin-bottom: 0.75rem;
+  }
+
+  .legal a {
+    color: var(--malica-marrom-ameixa);
+  }
+</style>

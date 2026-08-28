@@ -1,0 +1,61 @@
+---
+import '../styles/global.css';
+import { SITE, SEO } from '../config/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  canonicalPath?: string;
+}
+
+const {
+  title = SEO.title,
+  description = SEO.description,
+  ogImage = SEO.ogImage,
+  canonicalPath = '/',
+} = Astro.props as Props;
+
+const canonicalUrl = new URL(canonicalPath, SITE.url).href;
+const ogImageUrl = new URL(ogImage, SITE.url).href;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <slot name="head" />
+  </head>
+  <body data-meta-pixel-id={SITE.metaPixelId}>
+    <slot />
+    <script>
+      import '../scripts/tracking.ts';
+    </script>
+  </body>
+</html>

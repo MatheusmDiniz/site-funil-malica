@@ -1,0 +1,216 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE } from '../config/site';
+
+const lastUpdated = '28 de agosto de 2026';
+const hasMetaPixel = Boolean(SITE.metaPixelId);
+---
+
+<BaseLayout
+  title="Política de Privacidade | Malica"
+  description="Saiba como a Malica trata seus dados de navegação, cookies e ferramentas de análise."
+  canonicalPath="/politica-de-privacidade"
+>
+  <Header />
+  <main class="legal">
+    <div class="container legal__inner">
+      <a href="/" class="legal__back">← Voltar para a página inicial</a>
+
+      <h1>Política de Privacidade</h1>
+      <p class="legal__updated">Última atualização: {lastUpdated}</p>
+
+      <section>
+        <h2>1. Quem somos</h2>
+        <p>
+          A Malica é uma comunidade que compartilha ofertas, cupons e achadinhos
+          para bebês, crianças, gestantes e mamães. Esta política descreve como
+          tratamos informações quando você visita nosso site.
+        </p>
+      </section>
+
+      <section>
+        <h2>2. Dados que podemos coletar</h2>
+        <p>Ao acessar este site, podemos coletar automaticamente:</p>
+        <ul>
+          <li>Endereço IP e data/hora de acesso;</li>
+          <li>Tipo de navegador, dispositivo e sistema operacional;</li>
+          <li>Páginas visitadas e origem do acesso (incluindo parâmetros UTM de campanhas);</li>
+          <li>Dados técnicos de cookies essenciais para o funcionamento do site.</li>
+        </ul>
+        <p>
+          Não solicitamos cadastro nesta landing page. Ao clicar para entrar no
+          grupo do WhatsApp, você será direcionado à plataforma WhatsApp, regida
+          pelas políticas próprias do Meta/WhatsApp.
+        </p>
+      </section>
+
+      <section>
+        <h2>3. Cookies</h2>
+        <p>
+          Utilizamos cookies essenciais para garantir o funcionamento básico do
+          site. Cookies são pequenos arquivos armazenados no seu dispositivo.
+        </p>
+        {
+          hasMetaPixel ? (
+            <p>
+              Quando o Meta Pixel estiver ativo, cookies e tecnologias similares
+              podem ser utilizados para medir visitas e interações com anúncios,
+              conforme a política do Meta.
+            </p>
+          ) : (
+            <p>
+              Atualmente não utilizamos ferramentas de publicidade que dependam
+              de cookies de rastreamento. Caso o Meta Pixel seja instalado no
+              futuro, esta política será atualizada.
+            </p>
+          )
+        }
+      </section>
+
+      {
+        hasMetaPixel && (
+          <section>
+            <h2>4. Meta Pixel</h2>
+            <p>
+              Utilizamos o Meta Pixel (Facebook) para entender o desempenho de
+              nossos anúncios e medir acessos à página e cliques no botão do
+              grupo do WhatsApp. Os dados são processados pelo Meta conforme sua
+              política de privacidade.
+            </p>
+            <p>Eventos medidos incluem:</p>
+            <ul>
+              <li>
+                <strong>PageView</strong> — quando alguém acessa a landing page;
+              </li>
+              <li>
+                <strong>WhatsAppGroupClick</strong> — quando alguém clica para
+                entrar no grupo.
+              </li>
+            </ul>
+          </section>
+        )
+      }
+
+      <section>
+        <h2>{hasMetaPixel ? '5' : '4'}. Links externos e afiliados</h2>
+        <p>
+          Nosso site e grupo podem conter links para lojas, marketplaces e outras
+          páginas externas. Alguns desses links podem ser links de afiliados: se
+          você comprar por eles, a Malica pode receber comissão sem custo
+          adicional para você.
+        </p>
+        <p>
+          Não controlamos o conteúdo ou as práticas de privacidade de sites
+          terceiros. Recomendamos ler as políticas de cada serviço que você
+          utilizar.
+        </p>
+      </section>
+
+      <section>
+        <h2>{hasMetaPixel ? '6' : '5'}. Finalidade do tratamento</h2>
+        <p>Utilizamos os dados descritos para:</p>
+        <ul>
+          <li>Operar e melhorar o site;</li>
+          <li>Medir o desempenho de campanhas publicitárias;</li>
+          <li>Garantir segurança e estabilidade;</li>
+          <li>Cumprir obrigações legais, quando aplicável.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>{hasMetaPixel ? '7' : '6'}. Seus direitos (LGPD)</h2>
+        <p>
+          Nos termos da Lei Geral de Proteção de Dados (LGPD), você pode
+          solicitar informações, correção ou exclusão de dados pessoais que
+          estejam sob nossa responsabilidade, quando aplicável.
+        </p>
+        <p>
+          Para exercer seus direitos ou tirar dúvidas, entre em contato pelo
+          e-mail{' '}
+          <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>{hasMetaPixel ? '8' : '7'}. Alterações nesta política</h2>
+        <p>
+          Podemos atualizar esta política periodicamente. A data da última
+          atualização será indicada no topo desta página.
+        </p>
+      </section>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .legal {
+    padding-block: 1rem 2rem;
+  }
+
+  .legal__inner {
+    max-width: 40rem;
+  }
+
+  .legal__back {
+    display: inline-block;
+    font-size: 0.875rem;
+    color: var(--malica-text-muted);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+  }
+
+  .legal__back:hover {
+    color: var(--malica-marrom-ameixa);
+    text-decoration: underline;
+  }
+
+  .legal h1 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin-bottom: 0.5rem;
+  }
+
+  .legal__updated {
+    font-size: 0.875rem;
+    color: var(--malica-text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .legal section {
+    margin-bottom: 1.75rem;
+  }
+
+  .legal h2 {
+    font-family: var(--malica-font-body);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    margin-bottom: 0.625rem;
+  }
+
+  .legal p,
+  .legal li {
+    font-size: 0.9375rem;
+    color: var(--malica-text-muted);
+    line-height: 1.65;
+  }
+
+  .legal p {
+    margin-bottom: 0.75rem;
+  }
+
+  .legal ul {
+    list-style: disc;
+    padding-left: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .legal li {
+    margin-bottom: 0.375rem;
+  }
+
+  .legal a {
+    color: var(--malica-marrom-ameixa);
+  }
+</style>

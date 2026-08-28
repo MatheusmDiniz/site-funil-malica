@@ -1,0 +1,72 @@
+---
+import { TESTIMONIALS } from '../config/site';
+
+const hasTestimonials = TESTIMONIALS.length > 0;
+---
+
+{
+  hasTestimonials && (
+    <section class="section testimonials" aria-labelledby="testimonials-title">
+      <div class="container">
+        <h2 id="testimonials-title" class="section__title">
+          Quem já faz parte
+        </h2>
+
+        <ul class="testimonials__grid">
+          {TESTIMONIALS.map((item) => (
+            <li class="testimonials__card">
+              <blockquote class="testimonials__quote">
+                <p>"{item.text}"</p>
+              </blockquote>
+              <cite class="testimonials__author">{item.name}</cite>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .testimonials__grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .testimonials__card {
+    background: var(--malica-surface);
+    border-radius: var(--malica-radius-md);
+    padding: 1.25rem;
+    box-shadow: var(--malica-shadow);
+    border: 1px solid rgba(115, 77, 87, 0.06);
+  }
+
+  .testimonials__quote {
+    margin: 0 0 0.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--malica-text);
+  }
+
+  .testimonials__quote p {
+    margin: 0;
+  }
+
+  .testimonials__author {
+    font-size: 0.8125rem;
+    font-style: normal;
+    font-weight: 600;
+    color: var(--malica-text-muted);
+  }
+
+  @media (min-width: 640px) {
+    .testimonials__grid {
+      flex-direction: row;
+    }
+
+    .testimonials__card {
+      flex: 1;
+    }
+  }
+</style>

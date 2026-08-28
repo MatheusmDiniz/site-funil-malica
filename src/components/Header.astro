@@ -1,0 +1,41 @@
+<header class="header">
+  <div class="container header__inner">
+    <a href="/" class="header__logo" aria-label="Malica — página inicial">
+      <img
+        src="/images/malica-logo.png"
+        alt="Malica"
+        width="140"
+        height="40"
+        fetchpriority="high"
+      />
+    </a>
+  </div>
+</header>
+
+<style>
+  .header {
+    padding-block: 1rem 0.5rem;
+  }
+
+  .header__inner {
+    display: flex;
+    justify-content: center;
+  }
+
+  .header__logo {
+    display: inline-flex;
+    text-decoration: none;
+  }
+
+  .header__logo img {
+    width: auto;
+    height: 2.25rem;
+    object-fit: contain;
+  }
+
+  @media (min-width: 640px) {
+    .header__logo img {
+      height: 2.5rem;
+    }
+  }
+</style>

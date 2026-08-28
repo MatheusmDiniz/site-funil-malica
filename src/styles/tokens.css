@@ -1,0 +1,29 @@
+:root {
+  --malica-rosa-antigo: #eba8a8;
+  --malica-verde-salvia: #8baa9d;
+  --malica-marrom-ameixa: #734d57;
+  --malica-creme: #fff8f5;
+  --malica-bege: #f4d7c5;
+  --malica-creme-escuro: #f4ece8;
+
+  --malica-text: var(--malica-marrom-ameixa);
+  --malica-text-muted: #8f6b74;
+  --malica-bg: var(--malica-creme);
+  --malica-surface: #ffffff;
+  --malica-cta: var(--malica-verde-salvia);
+  --malica-cta-hover: #7a998c;
+  --malica-cta-text: #ffffff;
+
+  --malica-radius-sm: 12px;
+  --malica-radius-md: 16px;
+  --malica-radius-lg: 24px;
+  --malica-shadow: 0 2px 12px rgba(115, 77, 87, 0.06);
+  --malica-shadow-md: 0 4px 20px rgba(115, 77, 87, 0.08);
+
+  --malica-font-heading: 'Fraunces', Georgia, serif;
+  --malica-font-body: 'DM Sans', system-ui, sans-serif;
+
+  --malica-max-width: 720px;
+  --malica-section-gap: clamp(3rem, 8vw, 5rem);
+  --malica-container-padding: clamp(1rem, 4vw, 1.5rem);
+}

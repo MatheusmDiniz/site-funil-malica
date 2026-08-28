@@ -1,0 +1,29 @@
+KIT DE IDENTIDADE VISUAL — MALICA
+
+Arquivos principais:
+
+- malica-logo-horizontal.png: logo horizontal em fundo creme.
+- malica-logo-vertical.png: logo vertical em fundo creme.
+- malica-icon.png: ícone quadrado em fundo creme para perfil.
+- arquivos com sufixo -white: versões em fundo branco.
+- arquivos com sufixo -transparent: versões com fundo transparente.
+- malica-profile-preview.png: simulação do ícone no recorte circular.
+
+Uso recomendado:
+
+- WhatsApp e Instagram: malica-icon.png.
+- Cabeçalho, banner ou assinatura: malica-logo-horizontal.png.
+- Artes quadradas e materiais institucionais: malica-logo-vertical.png.
+- Aplicação sobre fundos claros: versões transparentes.
+- Aplicação que exija fundo branco: versões -white.
+
+A versão transparente com o nome Malica foi otimizada para fundos claros.
+Para fundos muito escuros, prefira a versão em fundo creme ou branco.
+
+Paleta:
+
+- Rosa antigo: #EBA8A8
+- Verde-sálvia: #8BAA9D
+- Marrom ameixa: #734D57
+- Creme claro: #FFF8F5
+- Bege suave: #F4D7C5

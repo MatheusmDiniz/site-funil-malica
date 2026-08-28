@@ -1,0 +1,74 @@
+---
+import { CATEGORIES } from '../config/site';
+import CategoryIcon from './CategoryIcon.astro';
+---
+
+<section class="section section--alt categories" aria-labelledby="categories-title">
+  <div class="container">
+    <h2 id="categories-title" class="section__title">O que você encontra</h2>
+    <p class="section__subtitle">
+      Promoções selecionadas para cada fase da rotina com bebês e crianças.
+    </p>
+
+    <ul class="categories__grid">
+      {
+        CATEGORIES.map((category) => (
+          <li class="categories__card">
+            <div class="categories__icon-wrap">
+              <CategoryIcon name={category.icon} />
+            </div>
+            <h3 class="categories__name">{category.title}</h3>
+            <p class="categories__desc">{category.description}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .categories__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.875rem;
+  }
+
+  .categories__card {
+    background: var(--malica-surface);
+    border-radius: var(--malica-radius-md);
+    padding: 1.125rem 1rem;
+    box-shadow: var(--malica-shadow);
+    border: 1px solid rgba(115, 77, 87, 0.06);
+  }
+
+  .categories__icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--malica-radius-sm);
+    background-color: var(--malica-bege);
+    margin-bottom: 0.75rem;
+  }
+
+  .categories__name {
+    font-family: var(--malica-font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+  }
+
+  .categories__desc {
+    font-size: 0.8125rem;
+    color: var(--malica-text-muted);
+    line-height: 1.5;
+  }
+
+  @media (min-width: 640px) {
+    .categories__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+</style>
