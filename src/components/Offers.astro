@@ -1,0 +1,211 @@
+---
+import { OFFERS } from '../config/site';
+---
+
+<section class="section section--alt offers" aria-labelledby="offers-title">
+  <div class="container">
+    <h2 id="offers-title" class="section__title">
+      🔥 Olha algumas ofertas que já encontramos
+    </h2>
+    <p class="section__subtitle">
+      Promoções como essas são compartilhadas todos os dias no nosso grupo.
+    </p>
+
+    <ul class="offers__grid">
+      {
+        OFFERS.map((offer) => (
+          <li class="offers__card">
+            {offer.badge && <span class="offers__badge">{offer.badge}</span>}
+            <div class="offers__media">
+              <img
+                src={offer.image}
+                alt={offer.imageAlt}
+                width="640"
+                height="640"
+                loading="lazy"
+                decoding="async"
+                class="offers__image"
+              />
+            </div>
+            <div class="offers__body">
+              <h3 class="offers__name">{offer.name}</h3>
+              <p class="offers__prices">
+                <span class="offers__from">De: {offer.priceFrom}</span>
+                <span class="offers__to">
+                  <span class="offers__to-label">Por:</span>{' '}
+                  {offer.priceTo}
+                </span>
+              </p>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="offers__disclaimer">
+      *Preços encontrados no momento da publicação e sujeitos a alteração.
+    </p>
+  </div>
+</section>
+
+<style>
+  .offers__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .offers__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--malica-surface);
+    border-radius: var(--malica-radius-md);
+    overflow: hidden;
+    box-shadow: var(--malica-shadow);
+    border: 1px solid rgba(115, 77, 87, 0.06);
+  }
+
+  .offers__badge {
+    position: absolute;
+    top: 0.625rem;
+    left: 0.625rem;
+    z-index: 1;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--malica-marrom-ameixa);
+    background: var(--malica-bege);
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    line-height: 1.2;
+  }
+
+  .offers__media {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    height: auto;
+    padding: 1rem;
+    background: #fff;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(115, 77, 87, 0.06);
+  }
+
+  .offers__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+
+  .offers__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    padding: 0.875rem 1rem 1.125rem;
+  }
+
+  .offers__name {
+    font-family: var(--malica-font-body);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--malica-marrom-ameixa);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: calc(1.35em * 2);
+  }
+
+  .offers__prices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    margin-top: auto;
+  }
+
+  .offers__from {
+    font-size: 0.8125rem;
+    color: var(--malica-text-muted);
+    text-decoration: line-through;
+  }
+
+  .offers__to {
+    font-family: var(--malica-font-heading);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--malica-verde-salvia);
+    line-height: 1.2;
+  }
+
+  .offers__to-label {
+    font-family: var(--malica-font-body);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--malica-text-muted);
+  }
+
+  .offers__disclaimer {
+    margin-top: 1.25rem;
+    font-size: 0.75rem;
+    color: var(--malica-text-muted);
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  @media (min-width: 400px) {
+    .offers__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.875rem;
+    }
+
+    .offers__media {
+      padding: 0.875rem;
+    }
+
+    .offers__body {
+      padding: 0.75rem 0.875rem 1rem;
+    }
+
+    .offers__name {
+      font-size: 0.8125rem;
+    }
+
+    .offers__to {
+      font-size: 1.125rem;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .offers__grid {
+      gap: 1rem;
+    }
+
+    .offers__media {
+      padding: 1.125rem;
+    }
+
+    .offers__name {
+      font-size: 0.9375rem;
+    }
+
+    .offers__to {
+      font-size: 1.25rem;
+    }
+
+    .offers__body {
+      padding: 1rem 1.125rem 1.25rem;
+    }
+  }
+</style>

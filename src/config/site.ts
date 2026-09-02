@@ -74,3 +74,55 @@ export const HOW_IT_WORKS = [
 ] as const;
 
 export const STORES = ['Amazon', 'Shopee', 'Mercado Livre'] as const;
+
+export interface Offer {
+  name: string;
+  image: string;
+  imageAlt: string;
+  priceFrom: string;
+  priceTo: string;
+  badge?: string;
+}
+
+/** Exemplos reais de ofertas — troque imagens/preços conforme novas promoções. */
+export const OFFERS = [
+  {
+    name: 'Cadeirão de Alimentação Snzeske',
+    image: '/images/card-cadeira.png',
+    imageAlt: 'Cadeirão de alimentação infantil Snzeske portátil',
+    priceFrom: 'R$ 997,37',
+    priceTo: 'R$ 379,00',
+    badge: 'OFERTA 🔥',
+  },
+  {
+    name: 'Carrinho de Bebê EasyGo',
+    image: '/images/card-carrinho.png',
+    imageAlt: 'Carrinho de bebê EasyGo',
+    priceFrom: 'R$ 793,20',
+    priceTo: 'R$ 356,94',
+    badge: 'OFERTA 🔥',
+  },
+  {
+    name: 'Huggies Toalha Umedecida – 192 un.',
+    image: '/images/card-lencos.png',
+    imageAlt: 'Toalhas umedecidas Huggies 192 unidades',
+    priceFrom: 'R$ 62,90',
+    priceTo: 'R$ 31,90',
+    badge: 'OFERTA 🔥',
+  },
+  {
+    name: 'Tapete de Atividades para Bebê',
+    image: '/images/card-tapete.png',
+    imageAlt: 'Tapete de atividades para bebê',
+    priceFrom: 'R$ 100,46',
+    priceTo: 'R$ 57,00',
+    badge: 'OFERTA 🔥',
+  },
+] as const;
+
+export const MID_CTA_BENEFITS = [
+  '🔕 Somente administradores enviam mensagens',
+  '🛍️ Ofertas da Amazon, Shopee, Mercado Livre e outras lojas',
+  '💰 Promoções e cupons selecionados',
+  '🆓 Entrada gratuita',
+] as const;

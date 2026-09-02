@@ -1,0 +1,56 @@
+---
+import { MID_CTA_BENEFITS } from '../config/site';
+import WhatsAppCta from './WhatsAppCta.astro';
+---
+
+<section class="section mid-cta" aria-labelledby="mid-cta-title">
+  <div class="container mid-cta__inner">
+    <h2 id="mid-cta-title" class="mid-cta__title">
+      Quer receber ofertas assim todos os dias?
+    </h2>
+
+    <ul class="mid-cta__benefits" aria-label="Benefícios do grupo">
+      {
+        MID_CTA_BENEFITS.map((benefit) => (
+          <li class="mid-cta__benefit">{benefit}</li>
+        ))
+      }
+    </ul>
+
+    <WhatsAppCta label="Entrar grátis no grupo VIP 🧡" />
+  </div>
+</section>
+
+<style>
+  .mid-cta__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    max-width: 26rem;
+    margin-inline: auto;
+  }
+
+  .mid-cta__title {
+    font-size: clamp(1.25rem, 4vw, 1.5rem);
+    margin-bottom: 1.25rem;
+    text-wrap: balance;
+  }
+
+  .mid-cta__benefits {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+    margin-bottom: 1.75rem;
+    width: 100%;
+    max-width: 22rem;
+  }
+
+  .mid-cta__benefit {
+    font-size: 0.875rem;
+    color: var(--malica-text-muted);
+    line-height: 1.45;
+    text-align: left;
+  }
+</style>

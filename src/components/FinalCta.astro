@@ -5,12 +5,13 @@ import WhatsAppCta from './WhatsAppCta.astro';
 <section class="section final-cta" aria-labelledby="final-cta-title">
   <div class="container final-cta__inner">
     <h2 id="final-cta-title" class="final-cta__title">
-      Quer receber os próximos achadinhos?
+      Não perca as próximas promoções 🧡
     </h2>
     <p class="final-cta__subtitle">
-      Entre no grupo gratuito e receba ofertas selecionadas direto no WhatsApp.
+      Entre gratuitamente no nosso grupo e receba os achadinhos que encontramos
+      todos os dias.
     </p>
-    <WhatsAppCta label="Entrar no grupo do WhatsApp" variant="secondary" />
+    <WhatsAppCta label="Entrar no grupo VIP" variant="secondary" />
   </div>
 </section>
 
@@ -33,6 +34,7 @@ import WhatsAppCta from './WhatsAppCta.astro';
   .final-cta__title {
     font-size: clamp(1.25rem, 4vw, 1.5rem);
     margin-bottom: 0.625rem;
+    text-wrap: balance;
   }
 
   .final-cta__subtitle {
