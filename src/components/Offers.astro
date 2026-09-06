@@ -49,6 +49,10 @@ import { OFFERS } from '../config/site';
 </section>
 
 <style>
+  .offers {
+    padding-top: 1.75rem;
+  }
+
   .offers__grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -188,6 +192,10 @@ import { OFFERS } from '../config/site';
   }
 
   @media (min-width: 640px) {
+    .offers {
+      padding-top: var(--malica-section-gap);
+    }
+
     .offers__grid {
       gap: 1rem;
     }
