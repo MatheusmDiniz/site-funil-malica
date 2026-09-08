@@ -37,9 +37,17 @@ function loadMetaPixel(pixelId: string): void {
   window.fbq('track', 'PageView');
 }
 
+/** Valor simbólico da conversão (grupo gratuito). Meta exige value > 0 + currency. */
+const WHATSAPP_CLICK_VALUE = 1;
+const WHATSAPP_CLICK_CURRENCY = 'BRL';
+
 function trackWhatsAppGroupClick(utmParams: UtmParams): void {
   if (typeof window.fbq !== 'function') return;
-  window.fbq('trackCustom', 'WhatsAppGroupClick', utmParams);
+  window.fbq('trackCustom', 'WhatsAppGroupClick', {
+    ...utmParams,
+    value: WHATSAPP_CLICK_VALUE,
+    currency: WHATSAPP_CLICK_CURRENCY,
+  });
 }
 
 function handleWhatsAppClick(event: Event): void {
