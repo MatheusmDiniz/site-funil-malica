@@ -106,6 +106,20 @@ function getDiscountValue(offer: FeedOffer): number | null {
   if (offer.desconto != null && Number.isFinite(offer.desconto) && offer.desconto > 0) {
     return offer.desconto;
   }
+
+  const price = offer.preco;
+  const prev = offer.preco_anterior;
+  if (
+    price != null &&
+    prev != null &&
+    Number.isFinite(price) &&
+    Number.isFinite(prev) &&
+    prev > price &&
+    prev > 0
+  ) {
+    return ((prev - price) / prev) * 100;
+  }
+
   return null;
 }
 
@@ -132,10 +146,24 @@ function compareOffers(a: OfferWithMeta, b: OfferWithMeta): number {
   if (activeSort === 'discount') {
     const da = getDiscountValue(a);
     const db = getDiscountValue(b);
-    if (da == null && db == null) return 0;
+    if (da == null && db == null) {
+      // Empate sem desconto: mantém mais recente como desempate
+      const ta = getUpdatedAt(a);
+      const tb = getUpdatedAt(b);
+      if (ta == null && tb == null) return 0;
+      if (ta == null) return 1;
+      if (tb == null) return -1;
+      return tb - ta;
+    }
     if (da == null) return 1;
     if (db == null) return -1;
-    return db - da;
+    if (db !== da) return db - da;
+    const ta = getUpdatedAt(a);
+    const tb = getUpdatedAt(b);
+    if (ta == null && tb == null) return 0;
+    if (ta == null) return 1;
+    if (tb == null) return -1;
+    return tb - ta;
   }
 
   const ta = getUpdatedAt(a);
