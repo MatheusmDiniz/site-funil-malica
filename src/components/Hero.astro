@@ -1,128 +1,57 @@
 ---
-import WhatsAppCta from './WhatsAppCta.astro';
 ---
 
-<section class="hero section" aria-labelledby="hero-title">
-  <div class="container hero__inner">
-    <div class="hero__content fade-in">
-      <h1 id="hero-title" class="hero__title">
-        Pague menos nos itens do seu bebê 🍼
-      </h1>
-      <p class="hero__subtitle">
-        Encontramos promoções, cupons e achadinhos para mamães e bebês e enviamos
-        tudo no nosso Grupo VIP gratuito.
-      </p>
-
-      <div class="hero__cta">
-        <WhatsAppCta label="Entrar grátis no grupo VIP 🧡" />
-      </div>
-
-      <p class="hero__trust">
-        🔕 Só administradores enviam mensagens · 🆓 100% gratuito
-      </p>
-    </div>
-
-    <div class="hero__visual fade-in">
-      <img
-        src="/images/malica-mascote.png"
-        alt="Mascote Malica — capivara dentro de uma sacola de compras"
-        width="280"
-        height="280"
-        loading="lazy"
-        class="hero__mascot"
-      />
-    </div>
+<section class="hero" aria-labelledby="hero-title">
+  <div class="container hero__inner fade-in">
+    <h1 id="hero-title" class="hero__title">
+      Achadinhos para mamães e bebês 💚
+    </h1>
+    <p class="hero__subtitle">
+      Ofertas encontradas pela Malica ao longo do dia.
+    </p>
+    <p class="hero__badge">Atualizado ao longo do dia</p>
   </div>
 </section>
 
 <style>
   .hero {
-    padding-top: 0.5rem;
-    padding-bottom: 1.5rem;
+    padding-top: 0;
+    padding-bottom: 0.35rem;
   }
 
   .hero__inner {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0;
     text-align: center;
-  }
-
-  .hero__content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 28rem;
+    max-width: 26rem;
+    margin-inline: auto;
   }
 
   .hero__title {
-    font-size: clamp(1.5rem, 5.5vw, 2.125rem);
+    font-size: clamp(1.2rem, 4.8vw, 1.5rem);
     color: var(--malica-marrom-ameixa);
-    margin-bottom: 1rem;
+    margin-bottom: 0.2rem;
     text-wrap: balance;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 
   .hero__subtitle {
-    font-size: clamp(0.9375rem, 2.8vw, 1.0625rem);
-    color: var(--malica-text-muted);
-    line-height: 1.65;
-    margin-bottom: 1.75rem;
-  }
-
-  .hero__cta {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-bottom: 0.875rem;
-  }
-
-  .hero__trust {
     font-size: 0.8125rem;
     color: var(--malica-text-muted);
-    line-height: 1.5;
-    max-width: 22rem;
+    line-height: 1.4;
+    margin-bottom: 0.4rem;
   }
 
-  .hero__visual {
-    display: none;
-  }
-
-  .hero__mascot {
-    width: 240px;
-    height: auto;
-    object-fit: contain;
-  }
-
-  @media (min-width: 768px) {
-    .hero {
-      padding-bottom: var(--malica-section-gap);
-    }
-
-    .hero__inner {
-      flex-direction: row-reverse;
-      text-align: left;
-      justify-content: center;
-      gap: 3rem;
-    }
-
-    .hero__content {
-      align-items: flex-start;
-      flex: 1;
-      max-width: 26rem;
-    }
-
-    .hero__cta {
-      justify-content: flex-start;
-    }
-
-    .hero__trust {
-      text-align: left;
-    }
-
-    .hero__visual {
-      display: flex;
-      justify-content: center;
-    }
+  .hero__badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #5f7f72;
+    background: rgba(139, 170, 157, 0.2);
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
   }
 </style>

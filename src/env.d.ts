@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly PUBLIC_WHATSAPP_GROUP_URL: string;
   readonly PUBLIC_META_PIXEL_ID: string;
   readonly PUBLIC_CONTACT_EMAIL: string;
+  readonly PUBLIC_OFFERS_JSON_URL: string;
 }
 
 interface ImportMeta {

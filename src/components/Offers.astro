@@ -1,219 +1,932 @@
 ---
-import { OFFERS } from '../config/site';
+import { SITE } from '../config/site';
+import WhatsAppCta from './WhatsAppCta.astro';
+
+interface Props {
+  mode?: 'preview' | 'catalog';
+}
+
+const { mode = 'preview' } = Astro.props as Props;
+const isCatalog = mode === 'catalog';
+const offersJsonUrl = SITE.offersJsonUrl;
+const skeletonSlots = isCatalog
+  ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  : [1, 2, 3, 4, 5, 6, 7, 8];
 ---
 
-<section class="section section--alt offers" aria-labelledby="offers-title">
-  <div class="container">
+<section
+  id="ofertas"
+  class:list={['section', 'offers', { 'offers--catalog': isCatalog }]}
+  aria-labelledby="offers-title"
+  data-offers-root
+  data-offers-url={offersJsonUrl}
+  data-offers-mode={mode}
+  data-offers-preview-limit="8"
+  data-offers-page-size="12"
+  data-offers-max={isCatalog ? '100' : '8'}
+  data-offers-state="loading"
+  data-track-section={isCatalog ? 'offers-catalog' : 'offers'}
+>
+  <div class="container offers__intro">
     <h2 id="offers-title" class="section__title">
-      🔥 Olha algumas ofertas que já encontramos
+      {isCatalog ? '🔥 Todos os achadinhos' : '🔥 Achadinhos de hoje'}
     </h2>
     <p class="section__subtitle">
-      Promoções como essas são compartilhadas todos os dias no nosso grupo.
+      {isCatalog
+        ? 'Filtre por loja para encontrar o que você procura.'
+        : 'Novos achadinhos aparecem ao longo do dia'}
     </p>
 
-    <ul class="offers__grid">
+    {
+      isCatalog && (
+        <div class="offers__search" data-offers-search>
+          <label class="offers__search-label" for="offers-search-input">
+            Buscar achadinhos
+          </label>
+          <div class="offers__search-field">
+            <svg
+              class="offers__search-icon"
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="currentColor"
+                d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5Zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14Z"
+              ></path>
+            </svg>
+            <input
+              id="offers-search-input"
+              class="offers__search-input"
+              type="search"
+              name="q"
+              placeholder="Buscar produto, marca ou item..."
+              autocomplete="off"
+              enterkeyhint="search"
+              data-offers-search-input
+            />
+            <button
+              type="button"
+              class="offers__search-clear"
+              data-offers-search-clear
+              aria-label="Limpar busca"
+              hidden
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )
+    }
+  </div>
+
+  <div class="container">
+    {
+      isCatalog && (
+        <div class="offers__controls" data-offers-controls hidden>
+          <div
+            class="offers__filters offers__filters--stores"
+            data-offers-store-filters
+            role="group"
+            aria-label="Filtrar por loja"
+          >
+            {/* Preenchido via JS com lojas reais do feed */}
+          </div>
+
+          <div
+            class="offers__filters offers__filters--sort"
+            data-offers-sort
+            role="group"
+            aria-label="Ordenar achadinhos"
+          >
+            <button
+              type="button"
+              class="offers__filter offers__filter--active"
+              data-offer-sort="recent"
+              aria-pressed="true"
+            >
+              Mais recente
+            </button>
+            <button
+              type="button"
+              class="offers__filter"
+              data-offer-sort="price"
+              aria-pressed="false"
+            >
+              Mais barato
+            </button>
+            <button
+              type="button"
+              class="offers__filter"
+              data-offer-sort="discount"
+              aria-pressed="false"
+            >
+              Maior desconto
+            </button>
+          </div>
+        </div>
+      )
+    }
+
+    <div class="offers__grid" data-offers-grid aria-busy="true">
       {
-        OFFERS.map((offer) => (
-          <li class="offers__card">
-            {offer.badge && <span class="offers__badge">{offer.badge}</span>}
+        skeletonSlots.map(() => (
+          <article class="offers__card offers__card--skeleton" aria-hidden="true">
             <div class="offers__media">
-              <img
-                src={offer.image}
-                alt={offer.imageAlt}
-                width="640"
-                height="640"
-                loading="lazy"
-                decoding="async"
-                class="offers__image"
-              />
+              <div class="offers__skeleton-block offers__skeleton-media" />
             </div>
             <div class="offers__body">
-              <h3 class="offers__name">{offer.name}</h3>
-              <p class="offers__prices">
-                <span class="offers__from">De: {offer.priceFrom}</span>
-                <span class="offers__to">
-                  <span class="offers__to-label">Por:</span>{' '}
-                  {offer.priceTo}
-                </span>
-              </p>
+              <div class="offers__skeleton-block offers__skeleton-line" />
+              <div class="offers__skeleton-block offers__skeleton-line offers__skeleton-line--short" />
+              <div class="offers__skeleton-block offers__skeleton-price" />
             </div>
-          </li>
+          </article>
         ))
       }
-    </ul>
+    </div>
+
+    <div class="offers__filter-empty" data-offers-filter-empty hidden>
+      <p class="offers__filter-empty-title" data-offers-empty-title>
+        Nenhum achadinho nessa loja.
+      </p>
+      <p class="offers__filter-empty-text" data-offers-empty-text hidden>
+        Tente outro produto, marca ou categoria.
+      </p>
+    </div>
 
     <p class="offers__disclaimer">
-      *Preços encontrados no momento da publicação e sujeitos a alteração.
+      *Preços encontrados no momento da publicação e sujeitos a alteração. Ao
+      tocar no card, você abre a oferta na loja de origem.
     </p>
+
+    <div class="offers__more-wrap" data-offers-more-wrap hidden>
+      {
+        isCatalog ? (
+          <button type="button" class="offers__more" data-offers-more>
+            Ver mais achadinhos ↓
+          </button>
+        ) : (
+          <a
+            href="/achadinhos"
+            class="offers__more offers__more--link"
+            data-offers-more-link
+            data-track="see-all-offers"
+          >
+            Ver mais achadinhos →
+          </a>
+        )
+      }
+    </div>
+
+    {
+      !isCatalog && (
+        <aside
+          class="offers__home-cta"
+          data-feed-cta="feed_cta"
+          data-track-section="feed-cta"
+          data-offers-cta
+          hidden
+        >
+          <div class="offers__home-cta-copy">
+            <h3 class="offers__home-cta-title">Prefere receber no WhatsApp? 💚</h3>
+            <p class="offers__home-cta-text">
+              A Malica procura novos achadinhos ao longo do dia.
+            </p>
+          </div>
+          <div class="offers__home-cta-action">
+            <a
+              href={SITE.whatsappGroupUrl}
+              class="offers__home-cta-btn"
+              data-track="whatsapp-group"
+              data-track-source="feed_cta"
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              Receber próximos achadinhos
+            </a>
+            <p class="offers__home-cta-fine">
+              100% gratuito • Você pode sair quando quiser
+            </p>
+          </div>
+        </aside>
+      )
+    }
+
+    <div class="offers__empty" data-offers-empty hidden>
+      <p class="offers__empty-title">Estamos procurando novos achadinhos 💚</p>
+      <p class="offers__empty-text">
+        Enquanto isso, entre no grupo para receber as próximas promoções.
+      </p>
+      <WhatsAppCta
+        label="ENTRAR NO GRUPO"
+        source={isCatalog ? 'catalog_empty' : 'empty_offers'}
+      />
+    </div>
   </div>
+
+  <template id="offer-card-template">
+    <a
+      class="offers__card"
+      data-offer-card
+      data-track="offer-card"
+      href="#"
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+    >
+      <div class="offers__media">
+        <img
+          src="/images/malica-mascote.png"
+          alt=""
+          width="400"
+          height="400"
+          loading="lazy"
+          decoding="async"
+          class="offers__image"
+          data-offer-image
+          hidden
+        />
+        <div class="offers__skeleton-block offers__skeleton-media"></div>
+        <span class="offers__discount" data-offer-discount hidden></span>
+      </div>
+      <div class="offers__body">
+        <p class="offers__prices">
+          <span class="offers__from" data-offer-from hidden></span>
+          <span class="offers__to" data-offer-to hidden></span>
+        </p>
+        <h3 class="offers__name" data-offer-name hidden></h3>
+        <p class="offers__store" data-offer-store hidden></p>
+        <time class="offers__time" data-offer-time hidden>
+          <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true" focusable="false">
+            <path
+              fill="currentColor"
+              d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 10.6 3.2 1.9-.8 1.3L11 13.5V7h2v5.6Z"
+            ></path>
+          </svg>
+          <span data-offer-time-label></span>
+        </time>
+        <span class="offers__seal" data-offer-seal hidden>Malica</span>
+      </div>
+    </a>
+  </template>
 </section>
 
-<style>
-  .offers {
-    padding-top: 1.75rem;
+<script>
+  import { loadOffersFeed } from '../scripts/offers-feed.ts';
+
+  const root = document.querySelector<HTMLElement>('[data-offers-root]');
+  const url = root?.dataset.offersUrl ?? '';
+  const grid = root?.querySelector<HTMLElement>('[data-offers-grid]');
+
+  void loadOffersFeed(url).finally(() => {
+    if (grid) grid.removeAttribute('aria-busy');
+  });
+</script>
+
+<style is:global>
+  #ofertas.offers {
+    padding-top: 0.35rem;
+    padding-bottom: 1.25rem;
+    scroll-margin-top: 1rem;
   }
 
-  .offers__grid {
+  #ofertas .offers__intro .section__title {
+    font-size: clamp(1.35rem, 4.5vw, 1.75rem);
+    margin-bottom: 0.25rem;
+  }
+
+  #ofertas .offers__intro .section__subtitle {
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  #ofertas .offers__search {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 0.85rem;
+  }
+
+  #ofertas .offers__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  #ofertas .offers__controls[hidden] {
+    display: none !important;
+  }
+
+  #ofertas .offers__filters--stores {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+
+  #ofertas .offers__filters--sort {
+    flex: 0 0 auto;
+    margin-left: auto;
+    margin-bottom: 0;
+    justify-content: flex-end;
+    overflow-x: auto;
+  }
+
+  #ofertas .offers__search-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  #ofertas .offers__search-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 2.75rem;
+    background: #fff;
+    border: 1px solid rgba(115, 77, 87, 0.16);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(115, 77, 87, 0.04);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  #ofertas .offers__search-field:focus-within {
+    border-color: var(--malica-verde-salvia);
+    box-shadow: 0 0 0 3px rgba(139, 170, 157, 0.28);
+  }
+
+  #ofertas .offers__search-icon {
+    position: absolute;
+    left: 0.85rem;
+    color: #8a6871;
+    pointer-events: none;
+    flex-shrink: 0;
+  }
+
+  #ofertas .offers__search-input {
+    width: 100%;
+    min-width: 0;
+    height: 2.75rem;
+    padding: 0 2.5rem 0 2.65rem;
+    border: 0;
+    background: transparent;
+    color: var(--malica-marrom-ameixa);
+    font-family: var(--malica-font-body);
+    font-size: 0.9375rem;
+    line-height: 1.3;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  #ofertas .offers__search-input::placeholder {
+    color: #9a7a82;
+  }
+
+  #ofertas .offers__search-input::-webkit-search-cancel-button,
+  #ofertas .offers__search-input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  #ofertas .offers__search-clear {
+    position: absolute;
+    right: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: #8a6871;
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  #ofertas .offers__search-clear:hover {
+    color: var(--malica-marrom-ameixa);
+    background: rgba(115, 77, 87, 0.08);
+  }
+
+  #ofertas .offers__search-clear:focus-visible {
+    outline: 2px solid var(--malica-verde-salvia);
+    outline-offset: 1px;
+  }
+
+  #ofertas .offers__filters {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.45rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 0.2rem;
+    margin-bottom: 0.75rem;
+  }
+
+  #ofertas .offers__filters[hidden] {
+    display: none !important;
+  }
+
+  #ofertas .offers__filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  #ofertas .offers__filter {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 2.25rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid rgba(115, 77, 87, 0.14);
+    background: var(--malica-surface);
+    color: var(--malica-marrom-ameixa);
+    font-family: var(--malica-font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  #ofertas .offers__filter--active {
+    background: var(--malica-verde-salvia);
+    border-color: var(--malica-verde-salvia);
+    color: #fff;
+  }
+
+  #ofertas .offers__filter:focus-visible {
+    outline: 2px solid var(--malica-marrom-ameixa);
+    outline-offset: 2px;
+  }
+
+  #ofertas .offers__grid {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.625rem;
     align-items: stretch;
   }
 
-  .offers__card {
-    position: relative;
+  #ofertas .offers__card {
     display: flex;
     flex-direction: column;
-    height: 100%;
     background: var(--malica-surface);
-    border-radius: var(--malica-radius-md);
+    border-radius: 14px;
     overflow: hidden;
     box-shadow: var(--malica-shadow);
-    border: 1px solid rgba(115, 77, 87, 0.06);
+    border: 1px solid rgba(115, 77, 87, 0.07);
+    min-width: 0;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
   }
 
-  .offers__badge {
-    position: absolute;
-    top: 0.625rem;
-    left: 0.625rem;
-    z-index: 1;
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: var(--malica-marrom-ameixa);
-    background: var(--malica-bege);
-    padding: 0.25rem 0.5rem;
-    border-radius: 8px;
-    line-height: 1.2;
+  #ofertas a.offers__card:focus-visible {
+    outline: 2px solid var(--malica-verde-salvia);
+    outline-offset: 2px;
   }
 
-  .offers__media {
+  #ofertas .offers__media {
+    position: relative;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     aspect-ratio: 1 / 1;
-    height: auto;
-    padding: 1rem;
+    padding: 0.5rem;
     background: #fff;
     overflow: hidden;
     border-bottom: 1px solid rgba(115, 77, 87, 0.06);
   }
 
-  .offers__image {
+  #ofertas .offers__image {
     display: block;
     width: 100%;
     height: 100%;
-    max-width: 100%;
-    max-height: 100%;
     object-fit: contain;
     object-position: center;
   }
 
-  .offers__body {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    flex: 1;
-    padding: 0.875rem 1rem 1.125rem;
+  #ofertas .offers__image[hidden] {
+    display: none;
   }
 
-  .offers__name {
+  #ofertas .offers__discount {
+    position: absolute;
+    top: 0.4rem;
+    left: 0.4rem;
+    z-index: 1;
+    display: inline-flex;
+    font-size: 0.625rem;
+    font-weight: 700;
+    color: #fff;
+    background: #6f9485;
+    padding: 0.18rem 0.4rem;
+    border-radius: 6px;
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+  }
+
+  #ofertas .offers__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+    padding: 0.55rem 0.6rem 0.7rem;
+  }
+
+  #ofertas .offers__prices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+    order: 0;
+  }
+
+  #ofertas .offers__from {
+    font-size: 0.625rem;
+    color: #8a6871;
+    text-decoration: line-through;
+    line-height: 1.2;
+  }
+
+  #ofertas .offers__to {
+    font-family: var(--malica-font-heading);
+    font-size: clamp(1.2rem, 4.8vw, 1.45rem);
+    font-weight: 700;
+    color: #5f7f72;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  #ofertas .offers__name {
     font-family: var(--malica-font-body);
-    font-size: 0.9375rem;
-    font-weight: 600;
-    line-height: 1.35;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.3;
     color: var(--malica-marrom-ameixa);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: calc(1.35em * 2);
+    min-height: calc(1.3em * 2);
   }
 
-  .offers__prices {
+  #ofertas .offers__store {
+    font-size: 0.625rem;
+    color: #8a6871;
+    font-weight: 500;
+  }
+
+  #ofertas .offers__time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-top: auto;
+    font-size: 0.625rem;
+    color: #7a5560;
+    font-weight: 500;
+  }
+
+  #ofertas .offers__time svg {
+    flex-shrink: 0;
+    opacity: 0.75;
+  }
+
+  #ofertas .offers__seal {
+    align-self: flex-start;
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #6f9485;
+    opacity: 0.75;
+  }
+
+  #ofertas .offers__home-cta {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
-    margin-top: auto;
-  }
-
-  .offers__from {
-    font-size: 0.8125rem;
-    color: var(--malica-text-muted);
-    text-decoration: line-through;
-  }
-
-  .offers__to {
-    font-family: var(--malica-font-heading);
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--malica-verde-salvia);
-    line-height: 1.2;
-  }
-
-  .offers__to-label {
-    font-family: var(--malica-font-body);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--malica-text-muted);
-  }
-
-  .offers__disclaimer {
+    align-items: stretch;
+    gap: 0.75rem;
     margin-top: 1.25rem;
-    font-size: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--malica-radius-md);
+    background: rgba(139, 170, 157, 0.14);
+    border: 1px solid rgba(139, 170, 157, 0.28);
+  }
+
+  #ofertas .offers__home-cta-title {
+    font-family: var(--malica-font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--malica-marrom-ameixa);
+    margin-bottom: 0.2rem;
+    line-height: 1.25;
+  }
+
+  #ofertas .offers__home-cta-text {
+    font-size: 0.8125rem;
+    color: var(--malica-text-muted);
+    line-height: 1.4;
+  }
+
+  #ofertas .offers__home-cta-action {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  #ofertas .offers__home-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.65rem 1rem;
+    border-radius: var(--malica-radius-sm);
+    background: var(--malica-cta);
+    color: #fff !important;
+    text-decoration: none !important;
+    font-family: var(--malica-font-body);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    box-shadow: var(--malica-shadow);
+  }
+
+  #ofertas .offers__home-cta-btn:hover {
+    background: var(--malica-cta-hover);
+  }
+
+  #ofertas .offers__home-cta-btn:focus-visible {
+    outline: 2px solid var(--malica-marrom-ameixa);
+    outline-offset: 2px;
+  }
+
+  #ofertas .offers__home-cta-fine {
+    font-size: 0.6875rem;
     color: var(--malica-text-muted);
     text-align: center;
-    line-height: 1.5;
   }
 
-  @media (min-width: 400px) {
-    .offers__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.875rem;
+  #ofertas .offers__more-wrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  #ofertas .offers__filter-empty {
+    text-align: center;
+    padding: 1rem;
+    margin-bottom: 0.35rem;
+  }
+
+  #ofertas .offers__filter-empty-title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--malica-marrom-ameixa);
+    margin-bottom: 0.25rem;
+  }
+
+  #ofertas .offers__filter-empty-text {
+    font-size: 0.8125rem;
+    color: var(--malica-text-muted);
+    line-height: 1.4;
+  }
+
+  #ofertas .offers__more {
+    min-height: 2.65rem;
+    padding: 0.55rem 1.15rem;
+    border-radius: var(--malica-radius-sm);
+    border: 1.5px solid rgba(115, 77, 87, 0.2);
+    background: var(--malica-surface);
+    color: var(--malica-marrom-ameixa);
+    font-family: var(--malica-font-body);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--malica-shadow);
+  }
+
+  #ofertas a.offers__more--link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+
+  #ofertas .offers__more:hover {
+    border-color: var(--malica-verde-salvia);
+    color: #5f7f72;
+  }
+
+  #ofertas .offers__more:focus-visible {
+    outline: 2px solid var(--malica-verde-salvia);
+    outline-offset: 2px;
+  }
+
+  @media (min-width: 720px) {
+    #ofertas .offers__home-cta {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      padding: 0.875rem 1.25rem;
     }
 
-    .offers__media {
-      padding: 0.875rem;
+    #ofertas .offers__home-cta-copy {
+      flex: 1;
+      min-width: 0;
+      text-align: left;
     }
 
-    .offers__body {
-      padding: 0.75rem 0.875rem 1rem;
+    #ofertas .offers__home-cta-action {
+      flex-shrink: 0;
+      align-items: stretch;
+      min-width: 15rem;
     }
 
-    .offers__name {
-      font-size: 0.8125rem;
+    #ofertas .offers__home-cta-fine {
+      text-align: center;
+    }
+  }
+
+  #ofertas .offers__empty {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    background: var(--malica-surface);
+    border-radius: var(--malica-radius-md);
+    border: 1px dashed rgba(115, 77, 87, 0.15);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  #ofertas .offers__empty:not([hidden]) {
+    display: flex;
+  }
+
+  #ofertas [hidden] {
+    display: none !important;
+  }
+
+  #ofertas .offers__empty-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--malica-marrom-ameixa);
+  }
+
+  #ofertas .offers__empty-text {
+    font-size: 0.875rem;
+    color: var(--malica-text-muted);
+    max-width: 22rem;
+    line-height: 1.45;
+    margin-bottom: 0.35rem;
+  }
+
+  #ofertas .offers__disclaimer {
+    margin-top: 0.875rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.6875rem;
+    color: #8a6871;
+    text-align: center;
+    line-height: 1.45;
+  }
+
+  #ofertas .offers__skeleton-block {
+    background: linear-gradient(
+      90deg,
+      rgba(115, 77, 87, 0.06) 0%,
+      rgba(115, 77, 87, 0.12) 50%,
+      rgba(115, 77, 87, 0.06) 100%
+    );
+    background-size: 200% 100%;
+    border-radius: 8px;
+  }
+
+  #ofertas .offers__card--skeleton .offers__skeleton-media {
+    position: absolute;
+    inset: 0.5rem;
+  }
+
+  #ofertas .offers__card--skeleton .offers__skeleton-line {
+    height: 0.7rem;
+    width: 100%;
+  }
+
+  #ofertas .offers__card--skeleton .offers__skeleton-line--short {
+    width: 55%;
+  }
+
+  #ofertas .offers__card--skeleton .offers__skeleton-price {
+    height: 1.15rem;
+    width: 45%;
+    margin-top: 0.35rem;
+  }
+
+  #ofertas .offers__card:not(.offers__card--skeleton) .offers__skeleton-block {
+    display: none;
+  }
+
+  #ofertas .whatsapp-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.85rem;
+    padding: 0.75rem 1.15rem;
+    border-radius: var(--malica-radius-md);
+    font-family: var(--malica-font-body);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  #ofertas .whatsapp-cta--full {
+    width: 100%;
+  }
+
+  #ofertas .whatsapp-cta--primary {
+    background-color: var(--malica-cta);
+    color: var(--malica-cta-text);
+    box-shadow: var(--malica-shadow-md);
+  }
+
+  #ofertas .whatsapp-cta--primary:hover {
+    background-color: var(--malica-cta-hover);
+  }
+
+  #ofertas .whatsapp-cta__icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    #ofertas .offers__card--skeleton .offers__skeleton-block {
+      animation: offersShimmer 1.2s ease-in-out infinite;
     }
 
-    .offers__to {
-      font-size: 1.125rem;
+    #ofertas a.offers__card:hover {
+      box-shadow: var(--malica-shadow-md);
+      transform: translateY(-1px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+  }
+
+  @keyframes offersShimmer {
+    0% {
+      background-position: 100% 0;
+    }
+    100% {
+      background-position: -100% 0;
     }
   }
 
   @media (min-width: 640px) {
-    .offers {
-      padding-top: var(--malica-section-gap);
+    #ofertas.offers {
+      padding-top: 0.5rem;
+      padding-bottom: 1.75rem;
     }
 
-    .offers__grid {
+    #ofertas .offers__grid {
+      gap: 0.875rem;
+    }
+
+    #ofertas .offers__to {
+      font-size: 1.5rem;
+    }
+
+    #ofertas .offers__name {
+      font-size: 0.8125rem;
+    }
+  }
+
+  @media (min-width: 768px) {
+    #ofertas .offers__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    #ofertas .offers__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 1rem;
-    }
-
-    .offers__media {
-      padding: 1.125rem;
-    }
-
-    .offers__name {
-      font-size: 0.9375rem;
-    }
-
-    .offers__to {
-      font-size: 1.25rem;
-    }
-
-    .offers__body {
-      padding: 1rem 1.125rem 1.25rem;
     }
   }
 </style>

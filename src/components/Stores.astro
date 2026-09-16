@@ -1,12 +1,15 @@
 ---
-import { STORES } from '../config/site';
+import { STORES, TRUST_POINTS } from '../config/site';
 ---
 
 <section class="section section--alt stores" aria-labelledby="stores-title">
   <div class="container stores__inner">
-    <h2 id="stores-title" class="section__title">Onde encontramos as ofertas</h2>
+    <h2 id="stores-title" class="section__title">
+      Achadinhos de lojas que você já conhece
+    </h2>
     <p class="section__subtitle">
-      Garimpamos promoções em grandes lojas e marketplaces confiáveis.
+      Garimpamos promoções em marketplaces confiáveis — e só enviamos o que faz
+      sentido.
     </p>
 
     <ul class="stores__list" aria-label="Lojas e marketplaces">
@@ -15,6 +18,14 @@ import { STORES } from '../config/site';
           <li class="stores__item">
             <span class="stores__name">{store}</span>
           </li>
+        ))
+      }
+    </ul>
+
+    <ul class="stores__trust" aria-label="Por que entrar">
+      {
+        TRUST_POINTS.map((point) => (
+          <li class="stores__trust-item">{point}</li>
         ))
       }
     </ul>
@@ -35,7 +46,7 @@ import { STORES } from '../config/site';
     flex-wrap: wrap;
     justify-content: center;
     gap: 0.75rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1.5rem;
   }
 
   .stores__item {
@@ -57,6 +68,26 @@ import { STORES } from '../config/site';
     color: var(--malica-text-muted);
     border: 1px solid rgba(115, 77, 87, 0.08);
     letter-spacing: 0.02em;
+  }
+
+  .stores__trust {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .stores__trust-item {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--malica-marrom-ameixa);
+    background: var(--malica-surface);
+    padding: 0.625rem 1rem;
+    border-radius: var(--malica-radius-sm);
+    width: 100%;
+    max-width: 22rem;
+    border: 1px solid rgba(139, 170, 157, 0.25);
   }
 
   .stores__disclaimer {

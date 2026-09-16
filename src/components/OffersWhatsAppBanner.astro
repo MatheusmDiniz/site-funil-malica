@@ -1,0 +1,22 @@
+---
+import { SITE } from '../config/site';
+
+interface Props {
+  source?: string;
+}
+
+const { source = 'achadinhos_banner' } = Astro.props as Props;
+---
+
+<div class="offers-banner-bar">
+  <a
+    class="offers-banner"
+    href={SITE.whatsappGroupUrl}
+    data-track="whatsapp-group"
+    data-track-source={source}
+    rel="noopener noreferrer"
+    target="_blank"
+  >
+    <span>🔥 Entre no grupo VIP e receba os próximos achadinhos</span>
+  </a>
+</div>

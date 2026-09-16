@@ -2,20 +2,30 @@
 import WhatsAppCta from './WhatsAppCta.astro';
 ---
 
-<section class="section final-cta" aria-labelledby="final-cta-title">
+<section
+  class="final-cta"
+  aria-labelledby="final-cta-title"
+  data-track-section="final-cta"
+>
   <div class="container final-cta__inner">
     <h2 id="final-cta-title" class="final-cta__title">
-      Não perca as próximas promoções 🧡
+      Quer que a Malica procure por você?
     </h2>
     <p class="final-cta__subtitle">
-      Entre gratuitamente no nosso grupo e receba os achadinhos que encontramos
-      todos os dias.
+      Entre no grupo e receba os próximos achadinhos.
     </p>
-    <WhatsAppCta label="Entrar no grupo VIP" variant="secondary" />
+    <WhatsAppCta label="💚 ENTRAR NO GRUPO DA MALICA" source="footer_cta" />
+    <p class="final-cta__fine">
+      100% gratuito • Você pode sair quando quiser
+    </p>
   </div>
 </section>
 
 <style>
+  .final-cta {
+    padding-block: 1rem;
+  }
+
   .final-cta__inner {
     display: flex;
     flex-direction: column;
@@ -24,24 +34,35 @@ import WhatsAppCta from './WhatsAppCta.astro';
     background: linear-gradient(
       180deg,
       var(--malica-bege) 0%,
-      rgba(244, 215, 197, 0.4) 100%
+      rgba(244, 215, 197, 0.35) 100%
     );
-    border-radius: var(--malica-radius-lg);
-    padding: clamp(2rem, 6vw, 2.75rem) clamp(1.25rem, 4vw, 2rem);
+    border-radius: var(--malica-radius-md);
+    padding: 1.25rem 1rem;
     border: 1px solid rgba(235, 168, 168, 0.35);
   }
 
   .final-cta__title {
-    font-size: clamp(1.25rem, 4vw, 1.5rem);
-    margin-bottom: 0.625rem;
+    font-size: clamp(1.2rem, 4vw, 1.4rem);
+    margin-bottom: 0.35rem;
     text-wrap: balance;
   }
 
   .final-cta__subtitle {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
     color: var(--malica-text-muted);
     max-width: 22rem;
-    margin-bottom: 1.5rem;
-    line-height: 1.55;
+    margin-bottom: 0.875rem;
+    line-height: 1.45;
+  }
+
+  .final-cta__inner :global(.whatsapp-cta) {
+    max-width: none;
+    min-height: 3rem;
+  }
+
+  .final-cta__fine {
+    margin-top: 0.625rem;
+    font-size: 0.75rem;
+    color: var(--malica-text-muted);
   }
 </style>

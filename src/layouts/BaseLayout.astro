@@ -1,12 +1,14 @@
 ---
 import '../styles/global.css';
 import { SITE, SEO } from '../config/site';
+import OffersWhatsAppBanner from '../components/OffersWhatsAppBanner.astro';
 
 interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
   canonicalPath?: string;
+  bannerSource?: string;
 }
 
 const {
@@ -14,10 +16,23 @@ const {
   description = SEO.description,
   ogImage = SEO.ogImage,
   canonicalPath = '/',
+  bannerSource,
 } = Astro.props as Props;
 
 const canonicalUrl = new URL(canonicalPath, SITE.url).href;
 const ogImageUrl = new URL(ogImage, SITE.url).href;
+
+const resolvedBannerSource =
+  bannerSource ??
+  (canonicalPath === '/'
+    ? 'home_banner'
+    : canonicalPath.includes('achadinhos')
+      ? 'achadinhos_banner'
+      : canonicalPath.includes('privacidade')
+        ? 'privacy_banner'
+        : canonicalPath.includes('termos')
+          ? 'terms_banner'
+          : 'site_banner');
 ---
 
 <!doctype html>
@@ -53,6 +68,7 @@ const ogImageUrl = new URL(ogImage, SITE.url).href;
     <slot name="head" />
   </head>
   <body data-meta-pixel-id={SITE.metaPixelId}>
+    <OffersWhatsAppBanner source={resolvedBannerSource} />
     <slot />
     <script>
       import '../scripts/tracking.ts';

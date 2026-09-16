@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Offers from '../../components/Offers.astro';
+import Footer from '../../components/Footer.astro';
+import StickyWhatsApp from '../../components/StickyWhatsApp.astro';
+
+const title = 'Achadinhos | Malica';
+const description =
+  'Veja todos os achadinhos encontrados pela Malica. Filtre por loja, busque o que precisa e entre no grupo gratuito do WhatsApp.';
+---
+
+<BaseLayout title={title} description={description} canonicalPath="/achadinhos">
+  <Header />
+  <main id="conteudo-principal" class="achadinhos-page">
+    <Offers mode="catalog" />
+  </main>
+  <Footer />
+  <StickyWhatsApp />
+</BaseLayout>
+
+<style>
+  .achadinhos-page {
+    padding-bottom: 0.5rem;
+  }
+</style>

@@ -37,16 +37,25 @@ function loadMetaPixel(pixelId: string): void {
   window.fbq('track', 'PageView');
 }
 
+function trackCustom(eventName: string, params: Record<string, unknown> = {}): void {
+  if (typeof window.fbq !== 'function') return;
+  window.fbq('trackCustom', eventName, {
+    ...getUtmParams(),
+    ...params,
+  });
+}
+
 /** Valor simbólico da conversão (grupo gratuito). Meta exige value > 0 + currency. */
 const WHATSAPP_CLICK_VALUE = 1;
 const WHATSAPP_CLICK_CURRENCY = 'BRL';
 
-function trackWhatsAppGroupClick(utmParams: UtmParams): void {
+function trackWhatsAppGroupClick(utmParams: UtmParams, source?: string): void {
   if (typeof window.fbq !== 'function') return;
   window.fbq('trackCustom', 'WhatsAppGroupClick', {
     ...utmParams,
     value: WHATSAPP_CLICK_VALUE,
     currency: WHATSAPP_CLICK_CURRENCY,
+    ...(source ? { source } : {}),
   });
 }
 
@@ -56,12 +65,120 @@ function handleWhatsAppClick(event: Event): void {
 
   if (!href || href === '#') return;
 
-  trackWhatsAppGroupClick(getUtmParams());
+  const source = link.dataset.trackSource?.trim() || undefined;
+  trackWhatsAppGroupClick(getUtmParams(), source);
 }
 
-function bindWhatsAppLinks(): void {
-  document.querySelectorAll(WHATSAPP_TRACK_SELECTOR).forEach((element) => {
+function bindWhatsAppLinks(root: ParentNode = document): void {
+  root.querySelectorAll(WHATSAPP_TRACK_SELECTOR).forEach((element) => {
+    if ((element as HTMLElement).dataset.waBound === 'true') return;
+    (element as HTMLElement).dataset.waBound = 'true';
     element.addEventListener('click', handleWhatsAppClick);
+  });
+}
+
+function observeSectionOnce(
+  selector: string,
+  eventName: string,
+  threshold = 0.35,
+): void {
+  const section = document.querySelector(selector);
+  if (!section || typeof IntersectionObserver === 'undefined') return;
+
+  let fired = false;
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting || fired) continue;
+        fired = true;
+        trackCustom(eventName);
+        observer.disconnect();
+      }
+    },
+    { threshold },
+  );
+
+  observer.observe(section);
+}
+
+function observeFeedCtas(): void {
+  if (typeof IntersectionObserver === 'undefined') return;
+
+  const seen = new Set<string>();
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        const el = entry.target as HTMLElement;
+        const key = el.dataset.feedCta ?? el.dataset.trackSection ?? '';
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        trackCustom('FeedCtaView', {
+          source:
+            key === '1' || key === 'feed_cta_1'
+              ? 'feed_cta'
+              : key === '2' || key === 'feed_cta_2'
+                ? 'feed_cta'
+                : key === 'feed-cta'
+                  ? 'feed_cta'
+                  : key,
+        });
+        observer.unobserve(el);
+      }
+    },
+    { threshold: 0.4 },
+  );
+
+  const watch = () => {
+    document.querySelectorAll('[data-feed-cta]').forEach((el) => {
+      if ((el as HTMLElement).dataset.observed === 'true') return;
+      (el as HTMLElement).dataset.observed = 'true';
+      observer.observe(el);
+    });
+  };
+
+  watch();
+  document.addEventListener('malica:offers-rendered', () => {
+    bindWhatsAppLinks();
+    watch();
+  });
+}
+
+function bindOfferFilterTracking(): void {
+  document.addEventListener('malica:offer-filter', ((event: CustomEvent<{ filter: string }>) => {
+    trackCustom('OfferFilterClick', { filter: event.detail?.filter ?? '' });
+  }) as EventListener);
+
+  document.addEventListener('malica:offer-store-filter', ((event: CustomEvent<{ store: string }>) => {
+    trackCustom('OfferStoreFilterClick', { store: event.detail?.store ?? '' });
+  }) as EventListener);
+}
+
+function bindSeeAllOffers(): void {
+  document.querySelectorAll('[data-track="see-all-offers"]').forEach((el) => {
+    if ((el as HTMLElement).dataset.seeAllBound === 'true') return;
+    (el as HTMLElement).dataset.seeAllBound = 'true';
+    el.addEventListener('click', () => {
+      trackCustom('SeeAllOffersClick');
+    });
+  });
+}
+
+function bindOfferCardClicks(): void {
+  const root = document.querySelector('[data-offers-root]');
+  if (!root || (root as HTMLElement).dataset.offerClickBound === 'true') return;
+  (root as HTMLElement).dataset.offerClickBound = 'true';
+
+  root.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement | null;
+    const link = target?.closest<HTMLAnchorElement>('[data-track="offer-card"]');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (!href || href === '#') return;
+    trackCustom('OfferCardClick', {
+      loja: link.querySelector('[data-offer-store]')?.textContent ?? '',
+    });
   });
 }
 
@@ -74,6 +191,18 @@ export function initTracking(): void {
   }
 
   bindWhatsAppLinks();
+  observeSectionOnce('[data-track-section="offers"]', 'OffersSectionView');
+  observeSectionOnce('[data-track-section="offers-catalog"]', 'OffersCatalogView');
+  observeSectionOnce('[data-track-section="final-cta"]', 'FinalCtaView', 0.4);
+  observeFeedCtas();
+  bindOfferFilterTracking();
+  bindSeeAllOffers();
+  bindOfferCardClicks();
+
+  document.addEventListener('malica:offers-rendered', () => {
+    bindWhatsAppLinks();
+    bindSeeAllOffers();
+  });
 }
 
 if (typeof document !== 'undefined') {

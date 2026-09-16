@@ -1,56 +1,101 @@
 ---
-import { MID_CTA_BENEFITS } from '../config/site';
 import WhatsAppCta from './WhatsAppCta.astro';
 ---
 
-<section class="section mid-cta" aria-labelledby="mid-cta-title">
-  <div class="container mid-cta__inner">
-    <h2 id="mid-cta-title" class="mid-cta__title">
-      Quer receber ofertas assim todos os dias?
+<section class="section fomo-cta" aria-labelledby="fomo-title" data-track-section="fomo-cta">
+  <div class="container fomo-cta__inner">
+    <p class="fomo-cta__eyebrow">Essas são só algumas 👀</p>
+
+    <h2 id="fomo-title" class="fomo-cta__title">
+      As melhores ofertas acabam rápido.
     </h2>
 
-    <ul class="mid-cta__benefits" aria-label="Benefícios do grupo">
-      {
-        MID_CTA_BENEFITS.map((benefit) => (
-          <li class="mid-cta__benefit">{benefit}</li>
-        ))
-      }
-    </ul>
+    <div class="fomo-cta__copy">
+      <p>
+        Em vez de ficar procurando promoção o dia inteiro, a Malica faz isso por
+        você.
+      </p>
+      <p>Quando encontramos um achadinho bom, mandamos no grupo.</p>
+      <p class="fomo-cta__highlight">Você só precisa abrir o WhatsApp.</p>
+    </div>
 
-    <WhatsAppCta label="Entrar grátis no grupo VIP 🧡" />
+    <div class="fomo-cta__action">
+      <WhatsAppCta label="QUERO ENTRAR NO GRUPO GRÁTIS 💚" />
+      <p class="fomo-cta__fine">
+        100% gratuito • Você pode sair quando quiser
+      </p>
+      <p class="fomo-cta__loss">
+        Não descubra a promoção depois que ela acabou.
+      </p>
+    </div>
   </div>
 </section>
 
 <style>
-  .mid-cta__inner {
+  .fomo-cta__inner {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    max-width: 26rem;
+    max-width: 28rem;
     margin-inline: auto;
   }
 
-  .mid-cta__title {
-    font-size: clamp(1.25rem, 4vw, 1.5rem);
+  .fomo-cta__eyebrow {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--malica-text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .fomo-cta__title {
+    font-size: clamp(1.5rem, 5.5vw, 1.875rem);
     margin-bottom: 1.25rem;
     text-wrap: balance;
+    line-height: 1.2;
   }
 
-  .mid-cta__benefits {
+  .fomo-cta__copy {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
     gap: 0.625rem;
     margin-bottom: 1.75rem;
-    width: 100%;
-    max-width: 22rem;
+    font-size: 0.9875rem;
+    color: var(--malica-text-muted);
+    line-height: 1.55;
   }
 
-  .mid-cta__benefit {
-    font-size: 0.875rem;
+  .fomo-cta__highlight {
+    font-weight: 600;
+    color: var(--malica-marrom-ameixa);
+  }
+
+  .fomo-cta__action {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .fomo-cta__action :global(.whatsapp-cta) {
+    min-height: 3.5rem;
+    font-size: 1.0625rem;
+    max-width: none;
+  }
+
+  .fomo-cta__fine {
+    margin-top: 0.875rem;
+    font-size: 0.8125rem;
     color: var(--malica-text-muted);
+  }
+
+  .fomo-cta__loss {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--malica-marrom-ameixa);
+    max-width: 22rem;
     line-height: 1.45;
-    text-align: left;
+    text-wrap: balance;
   }
 </style>

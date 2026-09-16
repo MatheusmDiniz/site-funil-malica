@@ -7,7 +7,7 @@
   --malica-creme-escuro: #f4ece8;
 
   --malica-text: var(--malica-marrom-ameixa);
-  --malica-text-muted: #8f6b74;
+  --malica-text-muted: #7a5560;
   --malica-bg: var(--malica-creme);
   --malica-surface: #ffffff;
   --malica-cta: var(--malica-verde-salvia);
@@ -23,7 +23,8 @@
   --malica-font-heading: 'Fraunces', Georgia, serif;
   --malica-font-body: 'DM Sans', system-ui, sans-serif;
 
-  --malica-max-width: 720px;
-  --malica-section-gap: clamp(3rem, 8vw, 5rem);
-  --malica-container-padding: clamp(1rem, 4vw, 1.5rem);
+  --malica-max-width: 1200px;
+  --malica-section-gap: clamp(1.75rem, 4vw, 2.75rem);
+  --malica-container-padding: clamp(0.875rem, 3.5vw, 1.5rem);
+  --malica-sticky-cta-height: 3.75rem;
 }
