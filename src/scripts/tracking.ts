@@ -6,6 +6,7 @@ function getMetaPixelId(): string {
   return document.body.dataset.metaPixelId ?? '';
 }
 
+
 function isHomePath(): boolean {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
   return path === '/' || path === '/index.html';
