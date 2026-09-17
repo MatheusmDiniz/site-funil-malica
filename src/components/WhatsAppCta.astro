@@ -5,15 +5,15 @@ interface Props {
   label?: string;
   variant?: 'primary' | 'secondary';
   fullWidth?: boolean;
-  /** Identificador do CTA para analytics (ex.: feed_cta_1, footer_cta). */
-  source?: string;
+  /** Posição do CTA para o evento WhatsAppGroupClick. */
+  ctaPosition?: 'hero' | 'feed' | 'final';
 }
 
 const {
   label = 'Entrar no grupo gratuito',
   variant = 'primary',
   fullWidth = true,
-  source,
+  ctaPosition,
 } = Astro.props as Props;
 ---
 
@@ -21,7 +21,7 @@ const {
   href={SITE.whatsappGroupUrl}
   class:list={['whatsapp-cta', `whatsapp-cta--${variant}`, { 'whatsapp-cta--full': fullWidth }]}
   data-track="whatsapp-group"
-  data-track-source={source}
+  data-cta-position={ctaPosition}
   rel="noopener noreferrer"
   target="_blank"
 >

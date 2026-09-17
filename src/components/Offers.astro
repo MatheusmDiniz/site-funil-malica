@@ -200,7 +200,7 @@ const skeletonSlots = isCatalog
               href={SITE.whatsappGroupUrl}
               class="offers__home-cta-btn"
               data-track="whatsapp-group"
-              data-track-source="feed_cta"
+              data-cta-position="feed"
               rel="noopener noreferrer"
               target="_blank"
             >
@@ -219,10 +219,7 @@ const skeletonSlots = isCatalog
       <p class="offers__empty-text">
         Enquanto isso, entre no grupo para receber as próximas promoções.
       </p>
-      <WhatsAppCta
-        label="ENTRAR NO GRUPO"
-        source={isCatalog ? 'catalog_empty' : 'empty_offers'}
-      />
+      <WhatsAppCta label="ENTRAR NO GRUPO" ctaPosition="feed" />
     </div>
   </div>
 

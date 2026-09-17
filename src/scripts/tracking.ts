@@ -53,17 +53,22 @@ function trackCustom(eventName: string, params: Record<string, unknown> = {}): v
   });
 }
 
-/** Valor simbólico da conversão (grupo gratuito). Meta exige value > 0 + currency. */
-const WHATSAPP_CLICK_VALUE = 1;
-const WHATSAPP_CLICK_CURRENCY = 'BRL';
+/** Posição do CTA WhatsApp no funil (sem valor monetário). */
+type CtaPosition = 'hero' | 'feed' | 'final';
 
-function trackWhatsAppGroupClick(utmParams: UtmParams, source?: string): void {
+function parseCtaPosition(value: string | undefined): CtaPosition | undefined {
+  if (value === 'hero' || value === 'feed' || value === 'final') return value;
+  return undefined;
+}
+
+function trackWhatsAppGroupClick(
+  utmParams: UtmParams,
+  ctaPosition?: CtaPosition,
+): void {
   if (typeof window.fbq !== 'function') return;
   window.fbq('trackCustom', 'WhatsAppGroupClick', {
     ...utmParams,
-    value: WHATSAPP_CLICK_VALUE,
-    currency: WHATSAPP_CLICK_CURRENCY,
-    ...(source ? { source } : {}),
+    ...(ctaPosition ? { cta_position: ctaPosition } : {}),
   });
 }
 
@@ -73,8 +78,8 @@ function handleWhatsAppClick(event: Event): void {
 
   if (!href || href === '#') return;
 
-  const source = link.dataset.trackSource?.trim() || undefined;
-  trackWhatsAppGroupClick(getUtmParams(), source);
+  const ctaPosition = parseCtaPosition(link.dataset.ctaPosition?.trim());
+  trackWhatsAppGroupClick(getUtmParams(), ctaPosition);
 }
 
 function bindWhatsAppLinks(root: ParentNode = document): void {

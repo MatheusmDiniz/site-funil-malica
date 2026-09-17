@@ -1,11 +1,5 @@
 ---
 import { SITE } from '../config/site';
-
-interface Props {
-  source?: string;
-}
-
-const { source = 'achadinhos_banner' } = Astro.props as Props;
 ---
 
 <div class="offers-banner-bar">
@@ -13,7 +7,7 @@ const { source = 'achadinhos_banner' } = Astro.props as Props;
     class="offers-banner"
     href={SITE.whatsappGroupUrl}
     data-track="whatsapp-group"
-    data-track-source={source}
+    data-cta-position="hero"
     rel="noopener noreferrer"
     target="_blank"
   >
