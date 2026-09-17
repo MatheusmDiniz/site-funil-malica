@@ -32,7 +32,7 @@ Copie `.env.example` para `.env` e configure:
 
 Quando `PUBLIC_META_PIXEL_ID` estiver configurado:
 
-- **PageView** — disparado ao carregar a página
+- **PageView** — disparado ao carregar a home (`/`)
 - **WhatsAppGroupClick** — disparado ao clicar em qualquer CTA do WhatsApp
 
 Para trocar o evento customizado por um padrão (ex: `Lead`), edite `src/scripts/tracking.ts`.

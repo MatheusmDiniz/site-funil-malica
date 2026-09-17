@@ -6,6 +6,11 @@ function getMetaPixelId(): string {
   return document.body.dataset.metaPixelId ?? '';
 }
 
+function isHomePath(): boolean {
+  const path = window.location.pathname.replace(/\/+$/, '') || '/';
+  return path === '/' || path === '/index.html';
+}
+
 function loadMetaPixel(pixelId: string): void {
   if (!pixelId || window.fbq) return;
 
@@ -34,7 +39,10 @@ function loadMetaPixel(pixelId: string): void {
   document.head.appendChild(script);
 
   window.fbq('init', pixelId);
-  window.fbq('track', 'PageView');
+  // PageView só na home — /achadinhos já tem OffersCatalogView
+  if (isHomePath()) {
+    window.fbq('track', 'PageView');
+  }
 }
 
 function trackCustom(eventName: string, params: Record<string, unknown> = {}): void {
