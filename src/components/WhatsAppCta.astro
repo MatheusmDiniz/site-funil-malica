@@ -1,12 +1,24 @@
 ---
 import { SITE } from '../config/site';
 
+export type CtaPosition =
+  | 'hero'
+  | 'after_offers'
+  | 'feed'
+  | 'how_it_works'
+  | 'sticky'
+  | 'final'
+  | 'banner';
+
 interface Props {
   label?: string;
   variant?: 'primary' | 'secondary';
   fullWidth?: boolean;
   /** Posição do CTA para o evento WhatsAppGroupClick. */
-  ctaPosition?: 'hero' | 'feed' | 'final';
+  ctaPosition?: CtaPosition;
+  /** Marca o CTA do hero para o sticky observar. */
+  heroAnchor?: boolean;
+  class?: string;
 }
 
 const {
@@ -14,14 +26,22 @@ const {
   variant = 'primary',
   fullWidth = true,
   ctaPosition,
+  heroAnchor = false,
+  class: className,
 } = Astro.props as Props;
 ---
 
 <a
   href={SITE.whatsappGroupUrl}
-  class:list={['whatsapp-cta', `whatsapp-cta--${variant}`, { 'whatsapp-cta--full': fullWidth }]}
+  class:list={[
+    'whatsapp-cta',
+    `whatsapp-cta--${variant}`,
+    { 'whatsapp-cta--full': fullWidth },
+    className,
+  ]}
   data-track="whatsapp-group"
   data-cta-position={ctaPosition}
+  data-hero-cta={heroAnchor ? '' : undefined}
   rel="noopener noreferrer"
   target="_blank"
 >
@@ -87,6 +107,11 @@ const {
     background-color: var(--malica-cta-hover);
   }
 
+  .whatsapp-cta--secondary:focus-visible {
+    outline: 2px solid var(--malica-marrom-ameixa);
+    outline-offset: 3px;
+  }
+
   .whatsapp-cta__icon {
     width: 1.375rem;
     height: 1.375rem;
@@ -94,7 +119,14 @@ const {
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .whatsapp-cta--primary:active {
+    .whatsapp-cta--primary:hover,
+    .whatsapp-cta--secondary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(115, 77, 87, 0.14);
+    }
+
+    .whatsapp-cta--primary:active,
+    .whatsapp-cta--secondary:active {
       transform: scale(0.98);
     }
   }

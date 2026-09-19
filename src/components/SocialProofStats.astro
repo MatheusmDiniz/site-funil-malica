@@ -1,0 +1,113 @@
+---
+import { SOCIAL_PROOF_STATS } from '../config/site';
+
+const hasStats = SOCIAL_PROOF_STATS.length > 0;
+---
+
+{
+  hasStats && (
+    <section class="social-stats" aria-label="Números da Malica">
+      <div class="container">
+        <ul class="social-stats__list">
+          {SOCIAL_PROOF_STATS.map((stat, index) => (
+            <li class="social-stats__item">
+              {index > 0 && (
+                <span class="social-stats__sep" aria-hidden="true">
+                  ·
+                </span>
+              )}
+              <span class="social-stats__value">{stat.value}</span>
+              <span class="social-stats__label">{stat.label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .social-stats {
+    padding-block: 0.15rem 0.55rem;
+    background: linear-gradient(
+      180deg,
+      rgba(244, 215, 197, 0.22) 0%,
+      transparent 100%
+    );
+  }
+
+  .social-stats__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 0.65rem 0.25rem;
+    margin: 0;
+    padding: 0.55rem 0.75rem;
+    list-style: none;
+    border-radius: var(--malica-radius-md);
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(115, 77, 87, 0.06);
+  }
+
+  .social-stats__item {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.1rem;
+    min-width: 6.5rem;
+    padding-inline: 0.55rem;
+  }
+
+  .social-stats__sep {
+    display: none;
+  }
+
+  .social-stats__value {
+    font-family: var(--malica-font-heading);
+    font-size: clamp(1.2rem, 3.8vw, 1.5rem);
+    font-weight: 600;
+    color: var(--malica-rosa-antigo);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .social-stats__label {
+    font-size: 0.7rem;
+    color: var(--malica-text-muted);
+    line-height: 1.35;
+    max-width: 7.5rem;
+  }
+
+  @media (min-width: 640px) {
+    .social-stats__list {
+      gap: 0;
+      padding-inline: 1rem;
+    }
+
+    .social-stats__item {
+      min-width: 8.5rem;
+      padding-inline: 1.15rem;
+    }
+
+    .social-stats__sep {
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      color: var(--malica-rosa-antigo);
+      font-size: 1.25rem;
+      line-height: 1;
+      opacity: 0.7;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .social-stats {
+      padding-block: 0.25rem 0.65rem;
+    }
+  }
+</style>

@@ -1,0 +1,154 @@
+---
+import { LANDING_COPY } from '../config/site';
+import WhatsAppCta from './WhatsAppCta.astro';
+---
+
+<aside
+  class="after-offers-cta"
+  data-feed-cta="feed_cta"
+  data-track-section="feed-cta"
+  data-offers-cta
+  hidden
+>
+  <div class="after-offers-cta__inner">
+    <img
+      class="after-offers-cta__mascot"
+      src="/images/malica-mascote.png"
+      alt=""
+      width="56"
+      height="56"
+      loading="lazy"
+      decoding="async"
+    />
+    <div class="after-offers-cta__copy">
+      <h3 class="after-offers-cta__title">{LANDING_COPY.afterOffersTitle}</h3>
+      <p class="after-offers-cta__text">{LANDING_COPY.afterOffersText}</p>
+    </div>
+    <div class="after-offers-cta__action">
+      <WhatsAppCta
+        label={LANDING_COPY.ctaAfterOffers}
+        ctaPosition="after_offers"
+        fullWidth={false}
+      />
+      <p class="after-offers-cta__fine">{LANDING_COPY.afterOffersFine}</p>
+    </div>
+  </div>
+</aside>
+
+<style>
+  .after-offers-cta {
+    margin-block: 0.85rem 0.35rem;
+  }
+
+  .after-offers-cta[hidden] {
+    display: none !important;
+  }
+
+  .after-offers-cta__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.55rem;
+    padding: 0.85rem 0.9rem;
+    background: rgba(139, 170, 157, 0.12);
+    border-radius: var(--malica-radius-md);
+    border: 1px solid rgba(139, 170, 157, 0.22);
+  }
+
+  .after-offers-cta__mascot {
+    width: 2.75rem;
+    height: 2.75rem;
+    object-fit: contain;
+  }
+
+  .after-offers-cta__title {
+    font-family: var(--malica-font-heading);
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--malica-marrom-ameixa);
+    text-wrap: balance;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .after-offers-cta__text {
+    font-size: 0.8125rem;
+    color: var(--malica-text-muted);
+    line-height: 1.4;
+    max-width: 22rem;
+    margin: 0.2rem 0 0;
+  }
+
+  .after-offers-cta__action {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .after-offers-cta__inner :global(.whatsapp-cta) {
+    width: 100%;
+    max-width: 18rem;
+    min-height: 3rem;
+    font-size: 0.9375rem;
+  }
+
+  .after-offers-cta__fine {
+    margin: 0;
+    font-size: 0.6875rem;
+    color: var(--malica-text-muted);
+  }
+
+  @media (min-width: 900px) {
+    .after-offers-cta {
+      margin-block: 1rem 0.5rem;
+    }
+
+    .after-offers-cta__inner {
+      flex-direction: row;
+      text-align: left;
+      align-items: center;
+      gap: 1.25rem;
+      padding: 0.7rem 1.15rem;
+      width: 100%;
+    }
+
+    .after-offers-cta__mascot {
+      width: 3.35rem;
+      height: 3.35rem;
+      flex-shrink: 0;
+    }
+
+    .after-offers-cta__copy {
+      flex: 1 1 0;
+      min-width: 0;
+    }
+
+    .after-offers-cta__title {
+      font-size: 1.05rem;
+    }
+
+    .after-offers-cta__text {
+      max-width: none;
+    }
+
+    .after-offers-cta__action {
+      width: auto;
+      flex-shrink: 0;
+      align-items: stretch;
+    }
+
+    .after-offers-cta__inner :global(.whatsapp-cta) {
+      width: auto;
+      max-width: none;
+      padding-inline: 1.25rem;
+      white-space: nowrap;
+    }
+
+    .after-offers-cta__fine {
+      text-align: center;
+    }
+  }
+</style>

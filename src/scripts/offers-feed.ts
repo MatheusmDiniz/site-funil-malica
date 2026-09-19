@@ -30,9 +30,13 @@ type FeedConfig = {
 
 const FETCH_TIMEOUT_MS = 8000;
 const PLACEHOLDER_IMAGE = '/images/malica-mascote.png';
-const DEFAULT_PREVIEW_LIMIT = 8;
+const DEFAULT_PREVIEW_LIMIT = 3;
 const DEFAULT_CATALOG_PAGE = 12;
 const DEFAULT_CATALOG_MAX = 100;
+/** Home: só 3 hits de prova (sem grid extra). */
+const DEFAULT_PREVIEW_MAX = 3;
+/** Candidatos recentes para soft-rank na home (exibe só catalogMax). */
+const HOME_RANK_POOL = 48;
 const SEARCH_DEBOUNCE_MS = 300;
 
 let allOffers: OfferWithMeta[] = [];
@@ -48,6 +52,34 @@ let config: FeedConfig = {
   catalogMax: DEFAULT_CATALOG_MAX,
 };
 let fetchPromise: Promise<void> | null = null;
+let offersReady = false;
+const readyListeners: Array<() => void> = [];
+
+/** Ofertas já carregadas (vazio até o feed resolver). */
+export function getLoadedOffers(): FeedOffer[] {
+  return allOffers.map(({ storeKey: _sk, ...offer }) => offer);
+}
+
+/** Chama o callback quando o feed terminar (sucesso ou falha). */
+export function whenOffersReady(callback: () => void): void {
+  if (offersReady) {
+    callback();
+    return;
+  }
+  readyListeners.push(callback);
+}
+
+function notifyOffersReady(): void {
+  offersReady = true;
+  while (readyListeners.length) {
+    const cb = readyListeners.shift();
+    try {
+      cb?.();
+    } catch {
+      /* ignore listener errors */
+    }
+  }
+}
 
 function formatBRL(value: number): string {
   return value.toLocaleString('pt-BR', {
@@ -80,25 +112,270 @@ function isFeedOffer(value: unknown): value is FeedOffer {
   );
 }
 
+/** Ambos os preços obrigatórios para qualquer listagem. */
+function hasValidPrices(offer: FeedOffer): boolean {
+  return (
+    offer.preco != null &&
+    Number.isFinite(offer.preco) &&
+    offer.preco_anterior != null &&
+    Number.isFinite(offer.preco_anterior)
+  );
+}
+
 function truncateTitle(title: string, max = 72): string {
   const t = title.trim();
   if (t.length <= max) return t;
   return `${t.slice(0, max - 1).trimEnd()}…`;
 }
 
+/**
+ * Sanitiza títulos gritados de marketplace sem destruir marcas/siglas/tamanhos.
+ * Usar só na home e mockups — não no catálogo.
+ */
+export function presentOfferTitle(raw: string, max = 52): string {
+  let t = raw.trim();
+  if (!t) return t;
+
+  // Remove gritos de urgência, preservando o restante
+  t = t
+    .replace(/\bCORR+E+\b/gi, '')
+    .replace(/\bURGENTE\b/gi, '')
+    .replace(/\bIMPERD[IÍ]VEL\b/gi, '')
+    .replace(/!{2,}/g, '!')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
+  const letters = t.replace(/[^A-Za-zÀ-ÿ]/g, '');
+  const upper = letters.replace(/[^A-ZÀ-Ÿ]/g, '').length;
+  const mostlyShouting =
+    letters.length >= 8 && upper / letters.length >= 0.72;
+
+  if (mostlyShouting) {
+    // Title-case cuidadoso: tokens curtos / com dígitos / & ficam como estão
+    t = t
+      .split(/(\s+)/)
+      .map((token) => {
+        if (/^\s+$/.test(token)) return token;
+        if (token.length <= 3 && /^[A-Z0-9ÁÉÍÓÚÂÊÔÃÕÇ&x×./+-]+$/i.test(token)) {
+          return token.toUpperCase() === token ? token : token;
+        }
+        if (/\d/.test(token) || /[&/×x]/i.test(token)) return token;
+        const lower = token.toLocaleLowerCase('pt-BR');
+        return lower.charAt(0).toLocaleUpperCase('pt-BR') + lower.slice(1);
+      })
+      .join('');
+  }
+
+  return truncateTitle(t.replace(/\s{2,}/g, ' ').trim(), max);
+}
+
+const BABY_CATEGORY_HINTS = [
+  'bebe',
+  'bebê',
+  'fralda',
+  'mamadeira',
+  'lenco',
+  'lenço',
+  'leite',
+  'formula',
+  'fórmula',
+  'higiene',
+  'shampoo',
+  'sabonete',
+  'pomada',
+  'chupeta',
+  'carrinho',
+  'berco',
+  'berço',
+  'crianca',
+  'criança',
+  'kids',
+  'baby',
+  'gestante',
+  'mamae',
+  'mamãe',
+  'gestacao',
+  'gestação',
+  'body',
+  'macacao',
+  'macacão',
+  'roupa',
+  'enxoval',
+  'mijao',
+  'mijão',
+  'calcinha',
+  'cueca',
+];
+
+const DEMOTE_HINTS = [
+  'estria',
+  'celulite',
+  'emagrec',
+  'adulto',
+  'vinho',
+  'cerveja',
+  'pop it',
+  'popit',
+  'girafa',
+  'melman',
+  'brinquedo',
+  'toy',
+  'lancador',
+  'lançador',
+  'aviao',
+  'avião',
+  'bolha',
+  // Hero/home: evitar “hit caro” fora da rotina do H1
+  'barbie',
+  'boneca',
+  'patinete',
+  'travel system',
+  'travel',
+  'carrinho de bebe 3 em 1',
+];
+
+/** Pontuação mais alta para cotidiano bebê/mãe; brinquedos caem no extra. */
+function babyAffinityScore(offer: FeedOffer): number {
+  const cat = normalizeText(offer.categoria ?? '');
+  const title = normalizeText(offer.titulo);
+  let score = 0;
+
+  const dailyBoost = [
+    'fralda',
+    'leite',
+    'formula',
+    'lenco',
+    'higiene',
+    'mamadeira',
+    'pomada',
+    'shampoo',
+    'sabonete',
+    'body',
+    'macacao',
+    'enxoval',
+    'huggies',
+    'pampers',
+  ];
+
+  for (const hint of BABY_CATEGORY_HINTS) {
+    const n = normalizeText(hint);
+    if (cat.includes(n)) score += 5;
+    else if (title.includes(n)) score += 2;
+  }
+
+  // "infantil" sozinho é fraco (aparece em brinquedo); só ajuda se já há sinal baby
+  if (title.includes('infantil') || cat.includes('infantil')) {
+    score += score > 0 ? 2 : 0;
+  }
+
+  for (const hint of dailyBoost) {
+    const n = normalizeText(hint);
+    if (cat.includes(n) || title.includes(n)) score += 4;
+  }
+
+  for (const hint of DEMOTE_HINTS) {
+    const n = normalizeText(hint);
+    if (cat.includes(n)) score -= 8;
+    else if (title.includes(n)) score -= 7;
+  }
+  return score;
+}
+
+/** Economia absoluta em R$ (0 se inválida). */
+function absoluteSavings(offer: FeedOffer): number {
+  const price = offer.preco;
+  const prev = offer.preco_anterior;
+  if (
+    price != null &&
+    prev != null &&
+    Number.isFinite(price) &&
+    Number.isFinite(prev) &&
+    prev > price
+  ) {
+    return prev - price;
+  }
+  return 0;
+}
+
+/**
+ * Home ranking: relevância bebê/mãe primeiro; desempate por economia (R$)
+ * e % OFF — prioriza “hits” sem inventar urgência.
+ */
+function softRankForHome(offers: OfferWithMeta[]): OfferWithMeta[] {
+  return offers
+    .map((o, i) => ({
+      o,
+      i,
+      score: babyAffinityScore(o),
+      savings: absoluteSavings(o),
+      pct: getDiscountValue(o) ?? 0,
+    }))
+    .sort((a, b) => {
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.savings !== a.savings) return b.savings - a.savings;
+      if (b.pct !== a.pct) return b.pct - a.pct;
+      return a.i - b.i;
+    })
+    .map((x) => x.o);
+}
+
+/**
+ * 2 achados para o mockup do hero.
+ * Prioridade: rotina bebê/mãe (alinha ao H1) → desconto forte entre esses.
+ * Só cai para “maior R$ off” genérico se não houver ofertas de rotina.
+ */
+export function getHeroMockupOffers(limit = 2): FeedOffer[] {
+  const pool = getLoadedOffers();
+  if (pool.length === 0) return [];
+
+  const ranked = pool
+    .map((o, i) => {
+      const savings = absoluteSavings(o);
+      const pct = getDiscountValue(o) ?? 0;
+      const score = babyAffinityScore(o);
+      return {
+        o,
+        i,
+        savings,
+        pct,
+        score,
+        routine: score > 0 ? 1 : 0,
+        strong: savings >= 15 || pct >= 20 ? 1 : 0,
+      };
+    })
+    .sort((a, b) => {
+      if (b.routine !== a.routine) return b.routine - a.routine;
+      if (b.score !== a.score) return b.score - a.score;
+      if (b.strong !== a.strong) return b.strong - a.strong;
+      if (b.savings !== a.savings) return b.savings - a.savings;
+      if (b.pct !== a.pct) return b.pct - a.pct;
+      return a.i - b.i;
+    });
+
+  const routineHits = ranked.filter((x) => x.score > 0);
+  const pickFrom = routineHits.length >= limit ? routineHits : ranked;
+  return pickFrom.slice(0, limit).map((x) => x.o);
+}
+
 function setVisible(el: HTMLElement | null, visible: boolean): void {
   if (!el) return;
-  if (visible) el.removeAttribute('hidden');
-  else el.setAttribute('hidden', '');
+  if (visible) {
+    el.removeAttribute('hidden');
+    el.removeAttribute('aria-hidden');
+  } else {
+    el.setAttribute('hidden', '');
+    el.setAttribute('aria-hidden', 'true');
+  }
 }
 
 function readConfig(root: HTMLElement): FeedConfig {
   const mode = root.dataset.offersMode === 'catalog' ? 'catalog' : 'preview';
+  const defaultMax = mode === 'catalog' ? DEFAULT_CATALOG_MAX : DEFAULT_PREVIEW_MAX;
   return {
     mode,
     previewLimit: Number(root.dataset.offersPreviewLimit) || DEFAULT_PREVIEW_LIMIT,
     catalogPageSize: Number(root.dataset.offersPageSize) || DEFAULT_CATALOG_PAGE,
-    catalogMax: Number(root.dataset.offersMax) || DEFAULT_CATALOG_MAX,
+    catalogMax: Number(root.dataset.offersMax) || defaultMax,
   };
 }
 
@@ -193,9 +470,25 @@ function getFilteredOffers(): OfferWithMeta[] {
   return filtered.slice().sort(compareOffers);
 }
 
-function applyOffer(card: HTMLElement, offer: FeedOffer, index: number): void {
+function applyOffer(
+  card: HTMLElement,
+  offer: FeedOffer,
+  index: number,
+  opts: { proof?: boolean; extra?: boolean; actionLabel?: string } = {},
+): void {
   card.classList.remove('offers__card--skeleton');
   card.removeAttribute('aria-hidden');
+
+  const proof = opts.proof === true;
+  const extra = opts.extra === true;
+  const homeDisplay = proof || extra;
+
+  card.classList.toggle('offers__card--proof', proof);
+  card.classList.toggle('offers__card--extra', extra);
+
+  const displayTitle = homeDisplay
+    ? presentOfferTitle(offer.titulo, proof ? 52 : 40)
+    : truncateTitle(offer.titulo);
 
   const affiliate = offer.link?.trim() ?? '';
   if (card instanceof HTMLAnchorElement) {
@@ -203,10 +496,7 @@ function applyOffer(card: HTMLElement, offer: FeedOffer, index: number): void {
     card.target = '_blank';
     card.rel = 'noopener noreferrer sponsored';
     card.setAttribute('data-track', 'offer-card');
-    card.setAttribute(
-      'aria-label',
-      `Ver oferta: ${truncateTitle(offer.titulo, 60)}`,
-    );
+    card.setAttribute('aria-label', `Ver oferta: ${displayTitle}`);
   }
 
   if (affiliate) {
@@ -226,11 +516,14 @@ function applyOffer(card: HTMLElement, offer: FeedOffer, index: number): void {
   const store = card.querySelector<HTMLElement>('[data-offer-store]');
   const time = card.querySelector<HTMLElement>('[data-offer-time]');
   const seal = card.querySelector<HTMLElement>('[data-offer-seal]');
+  const badge = card.querySelector<HTMLElement>('[data-offer-badge]');
+  const savings = card.querySelector<HTMLElement>('[data-offer-savings]');
+  const action = card.querySelector<HTMLElement>('[data-offer-action]');
 
   if (img) {
     const src = offer.imagem?.trim() || PLACEHOLDER_IMAGE;
     img.src = src;
-    img.alt = offer.titulo;
+    img.alt = displayTitle;
     img.loading = index < 4 ? 'eager' : 'lazy';
     if (index < 2) img.fetchPriority = 'high';
     img.onerror = () => {
@@ -241,38 +534,49 @@ function applyOffer(card: HTMLElement, offer: FeedOffer, index: number): void {
   }
 
   if (name) {
-    name.textContent = truncateTitle(offer.titulo);
+    name.textContent = displayTitle;
     setVisible(name, true);
   }
 
-  const hasPrev =
-    offer.preco_anterior != null && Number.isFinite(offer.preco_anterior);
-  const hasPrice = offer.preco != null && Number.isFinite(offer.preco);
+  const prev = offer.preco_anterior!;
+  const price = offer.preco!;
 
   if (from) {
-    if (hasPrev) {
-      from.textContent = `De ${formatBRL(offer.preco_anterior!)}`;
-      setVisible(from, true);
+    if (homeDisplay) {
+      from.textContent = `De ${formatBRL(prev)}`;
     } else {
-      from.textContent = '';
-      setVisible(from, false);
+      from.textContent = `De ${formatBRL(prev)}`;
     }
+    setVisible(from, true);
   }
 
   if (to) {
-    if (hasPrice) {
-      to.textContent = formatBRL(offer.preco!);
-      setVisible(to, true);
+    if (homeDisplay) {
+      to.textContent = `por ${formatBRL(price)}`;
     } else {
-      to.textContent = '';
-      setVisible(to, false);
+      to.textContent = formatBRL(price);
+    }
+    setVisible(to, true);
+  }
+
+  if (savings) {
+    if (proof && prev > price) {
+      const saved = prev - price;
+      savings.textContent = `Você economiza ${formatBRL(saved)}`;
+      setVisible(savings, true);
+    } else {
+      savings.textContent = '';
+      setVisible(savings, false);
     }
   }
 
   if (discount) {
-    const d = offer.desconto;
-    if (d != null && Number.isFinite(d) && d > 0) {
-      discount.textContent = `🔥 ${Math.round(d)}% OFF`;
+    const pct = getDiscountValue(offer);
+    if (proof && pct != null && pct >= 30) {
+      discount.textContent = `${Math.round(pct)}% OFF`;
+      setVisible(discount, true);
+    } else if (!homeDisplay && pct != null && pct > 0) {
+      discount.textContent = `${Math.round(pct)}% OFF`;
       setVisible(discount, true);
     } else {
       discount.textContent = '';
@@ -280,34 +584,49 @@ function applyOffer(card: HTMLElement, offer: FeedOffer, index: number): void {
     }
   }
 
+  if (badge) setVisible(badge, proof);
+
+  if (action) {
+    const label = opts.actionLabel || 'Ver oferta';
+    action.textContent = proof ? `${label} →` : label;
+    setVisible(action, homeDisplay);
+  }
+
   if (store) {
-    const loja = offer.loja?.trim();
-    if (loja) {
-      store.textContent = loja;
-      setVisible(store, true);
-    } else {
+    if (homeDisplay) {
       store.textContent = '';
       setVisible(store, false);
+    } else {
+      const loja = offer.loja?.trim();
+      if (loja) {
+        store.textContent = loja;
+        setVisible(store, true);
+      } else {
+        store.textContent = '';
+        setVisible(store, false);
+      }
     }
   }
 
   if (time) {
     const relative = formatRelativeTime(offer.atualizado_em);
-    const label = time.querySelector<HTMLElement>('[data-offer-time-label]');
-    if (relative) {
-      if (label) label.textContent = `Encontrado ${relative}`;
-      else time.textContent = `Encontrado ${relative}`;
-      time.setAttribute('datetime', offer.atualizado_em!);
+    const labelEl = time.querySelector<HTMLElement>('[data-offer-time-label]');
+    if (relative && offer.atualizado_em) {
+      // Home: tempo discreto derivado do JSON; catálogo: “Encontrado …”
+      const text = proof ? relative : `Encontrado ${relative}`;
+      if (labelEl) labelEl.textContent = text;
+      else time.textContent = text;
+      time.setAttribute('datetime', offer.atualizado_em);
       setVisible(time, true);
     } else {
-      if (label) label.textContent = '';
+      if (labelEl) labelEl.textContent = '';
       else time.textContent = '';
       time.removeAttribute('datetime');
       setVisible(time, false);
     }
   }
 
-  if (seal) setVisible(seal, true);
+  if (seal) setVisible(seal, !homeDisplay);
 }
 
 function cloneTemplate(template: HTMLTemplateElement): HTMLElement | null {
@@ -368,23 +687,15 @@ function setActiveSortButtons(root: HTMLElement, id: OfferSortId): void {
   });
 }
 
-function buildGrid(root: HTMLElement): void {
-  const grid = root.querySelector<HTMLElement>('[data-offers-grid]');
-  const cardTpl = root.querySelector<HTMLTemplateElement>('#offer-card-template');
-  const moreWrap = root.querySelector<HTMLElement>('[data-offers-more-wrap]');
-  const loadMore = root.querySelector<HTMLButtonElement>('[data-offers-more]');
-  const moreLink = root.querySelector<HTMLAnchorElement>('[data-offers-more-link]');
-  const feedCta = root.querySelector<HTMLElement>('[data-offers-cta]');
-  const emptyFilter = root.querySelector<HTMLElement>('[data-offers-filter-empty]');
-
-  if (!grid || !cardTpl) return;
-
-  const filtered = getFilteredOffers();
-  const slice = filtered.slice(0, visibleCount);
-
+function fillGrid(
+  grid: HTMLElement,
+  cardTpl: HTMLTemplateElement,
+  offers: OfferWithMeta[],
+  startIndex: number,
+  opts: { proof?: boolean; extra?: boolean; actionLabel: string },
+): void {
   grid.innerHTML = '';
-
-  slice.forEach((offer, index) => {
+  offers.forEach((offer, i) => {
     const cardWrap = cloneTemplate(cardTpl);
     if (!cardWrap) return;
 
@@ -393,9 +704,73 @@ function buildGrid(root: HTMLElement): void {
       : cardWrap.querySelector<HTMLElement>('[data-offer-card]');
     if (!card) return;
 
-    applyOffer(card, offer, index);
+    applyOffer(card, offer, startIndex + i, {
+      proof: opts.proof,
+      extra: opts.extra,
+      actionLabel: opts.actionLabel,
+    });
     grid.appendChild(cardWrap);
   });
+}
+
+function buildGrid(root: HTMLElement): void {
+  const grid = root.querySelector<HTMLElement>('[data-offers-grid]');
+  const gridExtra = root.querySelector<HTMLElement>('[data-offers-grid-extra]');
+  const extraWrap = root.querySelector<HTMLElement>('[data-offers-extra]');
+  const cardTpl = root.querySelector<HTMLTemplateElement>('#offer-card-template');
+  const moreWrap = root.querySelector<HTMLElement>('[data-offers-more-wrap]');
+  const loadMore = root.querySelector<HTMLButtonElement>('[data-offers-more]');
+  const moreLink = root.querySelector<HTMLAnchorElement>('[data-offers-more-link]');
+  const feedCta = root.querySelector<HTMLElement>('[data-offers-cta]');
+  const emptyFilter = root.querySelector<HTMLElement>('[data-offers-filter-empty]');
+  const actionLabel = root.dataset.offerActionLabel?.trim() || 'Ver oferta';
+  // Preview home: prova ranqueada (até previewLimit). Catálogo usa o fluxo abaixo.
+  const isProofHome = config.mode === 'preview';
+
+  if (!grid || !cardTpl) return;
+
+  const filtered = getFilteredOffers();
+
+  if (isProofHome) {
+    const ranked = softRankForHome(filtered);
+    const proofOffers = ranked.slice(0, Math.min(config.previewLimit, config.catalogMax));
+
+    fillGrid(grid, cardTpl, proofOffers, 0, {
+      proof: true,
+      actionLabel,
+    });
+
+    // Sem segundo grid “Mais alguns achadinhos” na home.
+    if (gridExtra) {
+      gridExtra.innerHTML = '';
+      setVisible(gridExtra, false);
+    }
+    if (extraWrap) setVisible(extraWrap, false);
+
+    const hasCards = proofOffers.length > 0;
+    setVisible(grid, hasCards);
+
+    if (moreLink) {
+      setVisible(
+        moreLink.closest<HTMLElement>('[data-offers-more-wrap]') ?? moreLink,
+        allOffers.length > 0,
+      );
+    }
+    if (loadMore) setVisible(loadMore, false);
+    if (feedCta) setVisible(feedCta, hasCards);
+
+    // Home com prova: nunca exibir empty/filter-empty fantasmas
+    if (emptyFilter) setVisible(emptyFilter, false);
+    const emptyHome = root.querySelector<HTMLElement>('[data-offers-empty]');
+    if (emptyHome) setVisible(emptyHome, !hasCards);
+
+    document.dispatchEvent(new CustomEvent('malica:offers-rendered'));
+    return;
+  }
+
+  const slice = filtered.slice(0, visibleCount);
+
+  fillGrid(grid, cardTpl, slice, 0, { actionLabel });
 
   const hasCards = slice.length > 0;
   setVisible(grid, hasCards);
@@ -446,6 +821,7 @@ function buildGrid(root: HTMLElement): void {
   }
 
   if (feedCta) setVisible(feedCta, hasCards && config.mode === 'preview');
+  if (extraWrap) setVisible(extraWrap, false);
 
   document.dispatchEvent(new CustomEvent('malica:offers-rendered'));
 }
@@ -457,6 +833,8 @@ function resetVisibleCount(): void {
 
 function showEmptyState(root: HTMLElement, reason: 'empty' | 'error'): void {
   const grid = root.querySelector<HTMLElement>('[data-offers-grid]');
+  const gridExtra = root.querySelector<HTMLElement>('[data-offers-grid-extra]');
+  const extraWrap = root.querySelector<HTMLElement>('[data-offers-extra]');
   const controls = root.querySelector<HTMLElement>('[data-offers-controls]');
   const search = root.querySelector<HTMLElement>('[data-offers-search]');
   const empty = root.querySelector<HTMLElement>('[data-offers-empty]');
@@ -468,6 +846,11 @@ function showEmptyState(root: HTMLElement, reason: 'empty' | 'error'): void {
     grid.innerHTML = '';
     setVisible(grid, false);
   }
+  if (gridExtra) {
+    gridExtra.innerHTML = '';
+    setVisible(gridExtra, false);
+  }
+  if (extraWrap) setVisible(extraWrap, false);
   if (controls) setVisible(controls, false);
   if (search) setVisible(search, false);
   if (moreWrap) setVisible(moreWrap, false);
@@ -477,6 +860,7 @@ function showEmptyState(root: HTMLElement, reason: 'empty' | 'error'): void {
 
   root.dataset.offersState = reason;
   document.dispatchEvent(new CustomEvent('malica:offers-rendered'));
+  notifyOffersReady();
 }
 
 function showLoaded(root: HTMLElement): void {
@@ -600,7 +984,10 @@ async function fetchWithTimeout(url: string, ms: number): Promise<Response> {
 
 async function loadOffersFeedInternal(url: string): Promise<void> {
   const root = document.querySelector<HTMLElement>('[data-offers-root]');
-  if (!root) return;
+  if (!root) {
+    notifyOffersReady();
+    return;
+  }
 
   config = readConfig(root);
   bindUi(root);
@@ -625,11 +1012,16 @@ async function loadOffersFeedInternal(url: string): Promise<void> {
       return;
     }
 
-    const max =
-      config.mode === 'catalog' ? config.catalogMax : config.previewLimit;
+    // Preview home: carrega pool maior para soft-rank (relevância + economia),
+    // depois a UI mostra só até catalogMax (= 3 na home).
+    const poolSize =
+      config.mode === 'preview'
+        ? Math.max(config.catalogMax, HOME_RANK_POOL)
+        : config.catalogMax;
 
     allOffers = data
       .filter(isFeedOffer)
+      .filter(hasValidPrices)
       .sort((a, b) => {
         const ta = Date.parse(a.atualizado_em ?? '');
         const tb = Date.parse(b.atualizado_em ?? '');
@@ -640,7 +1032,7 @@ async function loadOffersFeedInternal(url: string): Promise<void> {
         if (bOk) return 1;
         return 0;
       })
-      .slice(0, max)
+      .slice(0, poolSize)
       .map((offer) => ({
         ...offer,
         storeKey: storeKeyFrom(offer.loja),
@@ -677,6 +1069,7 @@ async function loadOffersFeedInternal(url: string): Promise<void> {
 
     showLoaded(root);
     buildGrid(root);
+    notifyOffersReady();
   } catch {
     showEmptyState(root, 'error');
   }

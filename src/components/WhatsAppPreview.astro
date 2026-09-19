@@ -1,0 +1,256 @@
+---
+/**
+ * Preview visual inspirado em chat — sem CTA.
+ * Slots com altura reservada (sem CLS no enrich).
+ */
+---
+
+<div class="wa-preview" data-wa-preview aria-hidden="true">
+  <div class="wa-preview__phone">
+    <div class="wa-preview__bar">
+      <span class="wa-preview__avatar"></span>
+      <span class="wa-preview__name">Malica</span>
+    </div>
+
+    <div class="wa-preview__thread">
+      <div class="wa-preview__slot" data-wa-slot="0">
+        <div class="wa-preview__bubble" data-wa-brand>
+          <p class="wa-preview__label">Malica</p>
+          <p>Achadinho encontrado</p>
+          <p class="wa-preview__meta">Oferta no grupo</p>
+        </div>
+        <div class="wa-preview__bubble wa-preview__bubble--offer" data-wa-offer hidden>
+          <div class="wa-preview__row">
+            <img
+              class="wa-preview__img"
+              data-wa-img
+              src="/images/malica-mascote.png"
+              alt=""
+              width="48"
+              height="48"
+              loading="lazy"
+              decoding="async"
+            />
+            <div>
+              <p class="wa-preview__product" data-wa-name></p>
+              <p class="wa-preview__price" data-wa-price></p>
+            </div>
+          </div>
+          <p class="wa-preview__meta">Oferta encontrada pela Malica</p>
+        </div>
+      </div>
+
+      <div class="wa-preview__slot" data-wa-slot="1">
+        <div class="wa-preview__bubble" data-wa-brand>
+          <p class="wa-preview__label">Malica</p>
+          <p>Novas promoções ao longo do dia</p>
+          <p class="wa-preview__meta">Direto no WhatsApp</p>
+        </div>
+        <div class="wa-preview__bubble wa-preview__bubble--offer" data-wa-offer hidden>
+          <div class="wa-preview__row">
+            <img
+              class="wa-preview__img"
+              data-wa-img
+              src="/images/malica-mascote.png"
+              alt=""
+              width="48"
+              height="48"
+              loading="lazy"
+              decoding="async"
+            />
+            <div>
+              <p class="wa-preview__product" data-wa-name></p>
+              <p class="wa-preview__price" data-wa-price></p>
+            </div>
+          </div>
+          <p class="wa-preview__meta">Oferta encontrada pela Malica</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import {
+    getLoadedOffers,
+    presentOfferTitle,
+    whenOffersReady,
+  } from '../scripts/offers-feed.ts';
+
+  function formatBRL(value: number): string {
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  }
+
+  function enrichPreview(): void {
+    const offers = getLoadedOffers().slice(0, 2);
+    if (offers.length === 0) return;
+
+    offers.forEach((offer, i) => {
+      const slot = document.querySelector<HTMLElement>(`[data-wa-slot="${i}"]`);
+      if (!slot) return;
+      const brand = slot.querySelector<HTMLElement>('[data-wa-brand]');
+      const bubble = slot.querySelector<HTMLElement>('[data-wa-offer]');
+      const name = bubble?.querySelector<HTMLElement>('[data-wa-name]');
+      const price = bubble?.querySelector<HTMLElement>('[data-wa-price]');
+      const img = bubble?.querySelector<HTMLImageElement>('[data-wa-img]');
+      if (!bubble || !name || !price || !brand) return;
+
+      name.textContent = presentOfferTitle(offer.titulo, 44);
+      price.textContent = `De ${formatBRL(offer.preco_anterior!)} por ${formatBRL(offer.preco!)}`;
+
+      if (img && offer.imagem?.trim()) {
+        img.src = offer.imagem.trim();
+        img.onerror = () => {
+          img.onerror = null;
+          img.src = '/images/malica-mascote.png';
+        };
+      }
+
+      brand.setAttribute('hidden', '');
+      bubble.removeAttribute('hidden');
+    });
+  }
+
+  whenOffersReady(enrichPreview);
+</script>
+
+<style>
+  .wa-preview {
+    width: 100%;
+    max-width: 22.5rem;
+    margin-inline: auto;
+  }
+
+  .wa-preview__phone {
+    background: linear-gradient(
+      165deg,
+      var(--malica-bege) 0%,
+      rgba(244, 215, 197, 0.4) 100%
+    );
+    border-radius: var(--malica-radius-md);
+    border: 1px solid rgba(115, 77, 87, 0.1);
+    box-shadow: var(--malica-shadow-md);
+    overflow: hidden;
+  }
+
+  .wa-preview__bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 0.9rem;
+    background: rgba(139, 170, 157, 0.35);
+  }
+
+  .wa-preview__avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--malica-rosa-antigo);
+    flex-shrink: 0;
+  }
+
+  .wa-preview__name {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--malica-marrom-ameixa);
+  }
+
+  .wa-preview__thread {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 0.85rem;
+    background: var(--malica-surface);
+    min-height: 14rem;
+  }
+
+  .wa-preview__slot {
+    min-height: 5.25rem;
+  }
+
+  .wa-preview__bubble {
+    align-self: flex-start;
+    width: 100%;
+    max-width: 100%;
+    background: rgba(139, 170, 157, 0.14);
+    border-radius: 0.75rem 0.75rem 0.75rem 0.2rem;
+    padding: 0.55rem 0.7rem;
+    min-height: 5rem;
+    box-sizing: border-box;
+  }
+
+  .wa-preview__bubble[hidden] {
+    display: none !important;
+  }
+
+  .wa-preview__bubble p {
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    color: var(--malica-marrom-ameixa);
+  }
+
+  .wa-preview__label {
+    font-size: 0.625rem !important;
+    font-weight: 700;
+    color: #5f7f72 !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  .wa-preview__meta {
+    margin-top: 0.25rem !important;
+    font-size: 0.6875rem !important;
+    color: var(--malica-text-muted) !important;
+  }
+
+  .wa-preview__row {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+  }
+
+  .wa-preview__img {
+    width: 2.75rem;
+    height: 2.75rem;
+    object-fit: contain;
+    border-radius: 0.4rem;
+    background: #fff;
+    flex-shrink: 0;
+  }
+
+  .wa-preview__product {
+    font-weight: 600;
+    font-size: 0.75rem !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2em;
+  }
+
+  .wa-preview__price {
+    font-weight: 700;
+    font-size: 0.8125rem !important;
+    color: #5f7f72 !important;
+    margin-top: 0.15rem !important;
+  }
+
+  @media (min-width: 900px) {
+    .wa-preview {
+      max-width: none;
+      width: 100%;
+    }
+
+    .wa-preview__thread {
+      min-height: 16rem;
+      padding: 1rem;
+    }
+
+    .wa-preview__bubble {
+      min-height: 5.25rem;
+    }
+  }
+</style>

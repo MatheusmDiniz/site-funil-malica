@@ -14,7 +14,7 @@
 
 <style>
   .header {
-    padding-block: 0.5rem 0.15rem;
+    padding-block: 0.55rem 0.25rem;
   }
 
   .header__inner {
@@ -27,15 +27,21 @@
     text-decoration: none;
   }
 
+  .header__logo:focus-visible {
+    outline: 2px solid var(--malica-verde-salvia);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
   .header__logo img {
     width: auto;
-    height: 2rem;
+    height: 2.5rem; /* ~40px — marca legível no mobile */
     object-fit: contain;
   }
 
   @media (min-width: 640px) {
     .header__logo img {
-      height: 2.25rem;
+      height: 2.85rem;
     }
   }
 </style>

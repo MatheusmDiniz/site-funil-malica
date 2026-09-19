@@ -8,6 +8,8 @@ interface Props {
   description?: string;
   ogImage?: string;
   canonicalPath?: string;
+  /** Barra topo WhatsApp — desligada na home (hero cobre o CTA). */
+  showOffersBanner?: boolean;
 }
 
 const {
@@ -15,6 +17,7 @@ const {
   description = SEO.description,
   ogImage = SEO.ogImage,
   canonicalPath = '/',
+  showOffersBanner = true,
 } = Astro.props as Props;
 
 const canonicalUrl = new URL(canonicalPath, SITE.url).href;
@@ -54,7 +57,7 @@ const ogImageUrl = new URL(ogImage, SITE.url).href;
     <slot name="head" />
   </head>
   <body data-meta-pixel-id={SITE.metaPixelId}>
-    <OffersWhatsAppBanner />
+    {showOffersBanner && <OffersWhatsAppBanner />}
     <slot />
     <script>
       import '../scripts/tracking.ts';

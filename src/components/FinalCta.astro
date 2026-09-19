@@ -1,4 +1,5 @@
 ---
+import { LANDING_COPY } from '../config/site';
 import WhatsAppCta from './WhatsAppCta.astro';
 ---
 
@@ -6,27 +7,36 @@ import WhatsAppCta from './WhatsAppCta.astro';
   class="final-cta"
   aria-labelledby="final-cta-title"
   data-track-section="final-cta"
+  data-final-cta
 >
   <div class="container final-cta__inner">
-    <h2 id="final-cta-title" class="final-cta__title">
-      Quer que a Malica procure por você?
-    </h2>
-    <p class="final-cta__subtitle">
-      Entre no grupo e receba os próximos achadinhos.
-    </p>
-    <WhatsAppCta label="💚 ENTRAR NO GRUPO DA MALICA" ctaPosition="final" />
-    <p class="final-cta__fine">
-      100% gratuito • Você pode sair quando quiser
-    </p>
+    <img
+      class="final-cta__mascot"
+      src="/images/malica-mascote.png"
+      alt=""
+      width="200"
+      height="200"
+      loading="lazy"
+      decoding="async"
+    />
+    <div class="final-cta__content">
+      <h2 id="final-cta-title" class="final-cta__title">
+        {LANDING_COPY.finalTitle}
+      </h2>
+      <p class="final-cta__subtitle">{LANDING_COPY.finalSubtitle}</p>
+      <WhatsAppCta label={LANDING_COPY.ctaFinal} ctaPosition="final" />
+      <p class="final-cta__fine">{LANDING_COPY.finalFine}</p>
+    </div>
   </div>
 </section>
 
 <style>
   .final-cta {
-    padding-block: 1rem;
+    padding-block: var(--malica-section-gap);
   }
 
   .final-cta__inner {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -37,32 +47,86 @@ import WhatsAppCta from './WhatsAppCta.astro';
       rgba(244, 215, 197, 0.35) 100%
     );
     border-radius: var(--malica-radius-md);
-    padding: 1.25rem 1rem;
+    padding: 1.35rem 1rem 1.35rem;
     border: 1px solid rgba(235, 168, 168, 0.35);
+    overflow: hidden;
+  }
+
+  .final-cta__mascot {
+    width: 7.5rem;
+    height: 7.5rem;
+    object-fit: contain;
+    margin-bottom: 0.35rem;
+  }
+
+  .final-cta__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    z-index: 1;
   }
 
   .final-cta__title {
-    font-size: clamp(1.2rem, 4vw, 1.4rem);
-    margin-bottom: 0.35rem;
+    font-size: clamp(1.25rem, 4.2vw, 1.5rem);
+    margin-bottom: 0.4rem;
     text-wrap: balance;
   }
 
   .final-cta__subtitle {
-    font-size: 0.875rem;
+    font-size: 0.9rem;
     color: var(--malica-text-muted);
     max-width: 22rem;
-    margin-bottom: 0.875rem;
+    margin-bottom: 1rem;
     line-height: 1.45;
+    text-wrap: balance;
   }
 
   .final-cta__inner :global(.whatsapp-cta) {
-    max-width: none;
-    min-height: 3rem;
+    max-width: 19rem;
+    min-height: 3.15rem;
   }
 
   .final-cta__fine {
-    margin-top: 0.625rem;
+    margin-top: 0.7rem;
     font-size: 0.75rem;
     color: var(--malica-text-muted);
+  }
+
+  @media (min-width: 900px) {
+    .final-cta__inner {
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 1rem 2rem;
+      padding: 1.5rem 2rem 1.5rem 0.75rem;
+      overflow: visible;
+      width: 100%;
+    }
+
+    .final-cta__mascot {
+      width: 12rem;
+      height: 12rem;
+      margin: 0 0 -1.75rem -0.5rem;
+      flex-shrink: 0;
+      align-self: flex-end;
+    }
+
+    .final-cta__content {
+      flex: 1 1 auto;
+      align-items: flex-start;
+      text-align: left;
+      max-width: none;
+      padding-block: 0.35rem;
+    }
+
+    .final-cta__subtitle {
+      max-width: 32rem;
+    }
+
+    .final-cta__inner :global(.whatsapp-cta) {
+      max-width: 20rem;
+    }
   }
 </style>

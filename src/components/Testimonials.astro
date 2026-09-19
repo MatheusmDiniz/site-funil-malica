@@ -1,24 +1,41 @@
 ---
-import { TESTIMONIALS } from '../config/site';
+import { LANDING_COPY, TESTIMONIALS } from '../config/site';
 
 const hasTestimonials = TESTIMONIALS.length > 0;
+const count = TESTIMONIALS.length;
 ---
 
 {
   hasTestimonials && (
-    <section class="section testimonials" aria-labelledby="testimonials-title">
+    <section class="testimonials" aria-labelledby="testimonials-title">
       <div class="container">
         <h2 id="testimonials-title" class="section__title">
-          Quem já faz parte
+          {LANDING_COPY.testimonialsTitle}
         </h2>
 
-        <ul class="testimonials__grid">
+        <ul
+          class:list={[
+            'testimonials__grid',
+            { 'testimonials__grid--triple': count >= 3 },
+          ]}
+        >
           {TESTIMONIALS.map((item) => (
             <li class="testimonials__card">
               <blockquote class="testimonials__quote">
-                <p>"{item.text}"</p>
+                <span class="testimonials__mark" aria-hidden="true">
+                  “
+                </span>
+                <p>{item.text}</p>
               </blockquote>
-              <cite class="testimonials__author">{item.name}</cite>
+              <footer class="testimonials__meta">
+                <cite class="testimonials__author">{item.name}</cite>
+                {item.role && (
+                  <span class="testimonials__role">{item.role}</span>
+                )}
+                {item.context && (
+                  <span class="testimonials__context">{item.context}</span>
+                )}
+              </footer>
             </li>
           ))}
         </ul>
@@ -28,45 +45,100 @@ const hasTestimonials = TESTIMONIALS.length > 0;
 }
 
 <style>
+  .testimonials {
+    padding-block: 1.1rem 0.85rem;
+  }
+
+  .testimonials .section__title {
+    margin-bottom: 0.9rem;
+    text-wrap: balance;
+  }
+
   .testimonials__grid {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   .testimonials__card {
-    background: var(--malica-surface);
+    background: rgba(244, 215, 197, 0.28);
     border-radius: var(--malica-radius-md);
-    padding: 1.25rem;
-    box-shadow: var(--malica-shadow);
-    border: 1px solid rgba(115, 77, 87, 0.06);
+    padding: 1.1rem 1.15rem 1rem;
+    border: 1px solid rgba(115, 77, 87, 0.08);
+    box-shadow: none;
   }
 
   .testimonials__quote {
     margin: 0 0 0.75rem;
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    color: var(--malica-text);
+    position: relative;
+  }
+
+  .testimonials__mark {
+    display: block;
+    font-family: var(--malica-font-heading);
+    font-size: 2rem;
+    line-height: 0.75;
+    color: var(--malica-rosa-antigo);
+    margin-bottom: 0.2rem;
   }
 
   .testimonials__quote p {
     margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: var(--malica-text);
+    text-wrap: pretty;
+  }
+
+  .testimonials__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.12rem;
   }
 
   .testimonials__author {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-style: normal;
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--malica-marrom-ameixa);
+  }
+
+  .testimonials__role {
+    font-size: 0.75rem;
     color: var(--malica-text-muted);
   }
 
-  @media (min-width: 640px) {
-    .testimonials__grid {
-      flex-direction: row;
+  .testimonials__context {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #5f7f72;
+    letter-spacing: 0.02em;
+  }
+
+  @media (min-width: 900px) {
+    .testimonials {
+      padding-block: 1.35rem 1rem;
     }
 
-    .testimonials__card {
-      flex: 1;
+    .testimonials .section__title {
+      text-align: left;
+    }
+
+    .testimonials__grid--triple {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .testimonials__grid:not(.testimonials__grid--triple) {
+      grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+      gap: 1rem;
+    }
+
+    .testimonials__quote p {
+      font-size: 1rem;
     }
   }
 </style>

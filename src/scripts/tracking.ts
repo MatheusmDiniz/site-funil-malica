@@ -6,7 +6,6 @@ function getMetaPixelId(): string {
   return document.body.dataset.metaPixelId ?? '';
 }
 
-
 function isHomePath(): boolean {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
   return path === '/' || path === '/index.html';
@@ -55,11 +54,28 @@ function trackCustom(eventName: string, params: Record<string, unknown> = {}): v
 }
 
 /** Posição do CTA WhatsApp no funil (sem valor monetário). */
-type CtaPosition = 'hero' | 'feed' | 'final';
+type CtaPosition =
+  | 'hero'
+  | 'after_offers'
+  | 'feed'
+  | 'how_it_works'
+  | 'sticky'
+  | 'final'
+  | 'banner';
+
+const CTA_POSITIONS = new Set<string>([
+  'hero',
+  'after_offers',
+  'feed',
+  'how_it_works',
+  'sticky',
+  'final',
+  'banner',
+]);
 
 function parseCtaPosition(value: string | undefined): CtaPosition | undefined {
-  if (value === 'hero' || value === 'feed' || value === 'final') return value;
-  return undefined;
+  if (!value) return undefined;
+  return CTA_POSITIONS.has(value) ? (value as CtaPosition) : undefined;
 }
 
 function trackWhatsAppGroupClick(
@@ -67,12 +83,14 @@ function trackWhatsAppGroupClick(
   ctaPosition?: CtaPosition,
 ): void {
   if (typeof window.fbq !== 'function') return;
+  // Sem value/currency — mede cliques, não receita
   window.fbq('trackCustom', 'WhatsAppGroupClick', {
     ...utmParams,
     ...(ctaPosition ? { cta_position: ctaPosition } : {}),
   });
 }
 
+/** Só dispara em clique/ativação real do usuário no link. */
 function handleWhatsAppClick(event: Event): void {
   const link = event.currentTarget as HTMLAnchorElement;
   const href = link.getAttribute('href');

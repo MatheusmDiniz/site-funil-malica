@@ -1,31 +1,28 @@
 ---
-import { STORES, TRUST_POINTS } from '../config/site';
+import { LANDING_COPY, STORES } from '../config/site';
 ---
 
-<section class="section section--alt stores" aria-labelledby="stores-title">
+<section class="stores" aria-labelledby="stores-title">
   <div class="container stores__inner">
-    <h2 id="stores-title" class="section__title">
-      Achadinhos de lojas que você já conhece
+    <h2 id="stores-title" class="stores__title">
+      {LANDING_COPY.storesTitle}
     </h2>
-    <p class="section__subtitle">
-      Garimpamos promoções em marketplaces confiáveis — e só enviamos o que faz
-      sentido.
-    </p>
 
     <ul class="stores__list" aria-label="Lojas e marketplaces">
       {
         STORES.map((store) => (
           <li class="stores__item">
-            <span class="stores__name">{store}</span>
+            <img
+              class="stores__logo"
+              src={store.logo}
+              alt={store.name}
+              width="120"
+              height="32"
+              loading="lazy"
+              decoding="async"
+            />
+            <span class="sr-only">{store.name}</span>
           </li>
-        ))
-      }
-    </ul>
-
-    <ul class="stores__trust" aria-label="Por que entrar">
-      {
-        TRUST_POINTS.map((point) => (
-          <li class="stores__trust-item">{point}</li>
         ))
       }
     </ul>
@@ -37,64 +34,75 @@ import { STORES, TRUST_POINTS } from '../config/site';
 </section>
 
 <style>
+  .stores {
+    padding-block: 0.75rem 1rem;
+  }
+
   .stores__inner {
     text-align: center;
+  }
+
+  .stores__title {
+    font-family: var(--malica-font-heading);
+    font-size: clamp(1.05rem, 3.5vw, 1.25rem);
+    font-weight: 600;
+    color: var(--malica-marrom-ameixa);
+    margin: 0 0 0.85rem;
+    text-wrap: balance;
+    line-height: 1.3;
   }
 
   .stores__list {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    margin: 0 0 0.65rem;
+    padding: 0;
+    list-style: none;
   }
 
   .stores__item {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 2rem;
   }
 
-  .stores__name {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.75rem;
-    padding: 0.625rem 1.25rem;
-    background: var(--malica-surface);
-    border-radius: var(--malica-radius-sm);
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--malica-text-muted);
-    border: 1px solid rgba(115, 77, 87, 0.08);
-    letter-spacing: 0.02em;
-  }
-
-  .stores__trust {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
-    margin-bottom: 1.25rem;
-  }
-
-  .stores__trust-item {
-    font-size: 0.9375rem;
-    font-weight: 600;
-    color: var(--malica-marrom-ameixa);
-    background: var(--malica-surface);
-    padding: 0.625rem 1rem;
-    border-radius: var(--malica-radius-sm);
-    width: 100%;
-    max-width: 22rem;
-    border: 1px solid rgba(139, 170, 157, 0.25);
+  .stores__logo {
+    height: 1.75rem;
+    width: auto;
+    max-width: 7.5rem;
+    object-fit: contain;
+    opacity: 0.92;
   }
 
   .stores__disclaimer {
-    font-size: 0.75rem;
+    font-size: 0.6875rem;
     color: var(--malica-text-muted);
-    max-width: 24rem;
-    margin-inline: auto;
-    line-height: 1.5;
+    max-width: 22rem;
+    margin: 0 auto;
+    line-height: 1.45;
+  }
+
+  @media (min-width: 900px) {
+    .stores {
+      padding-block: 0.9rem 1.1rem;
+    }
+
+    .stores__title {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+
+    .stores__list {
+      gap: 1rem 2.25rem;
+    }
+
+    .stores__logo {
+      height: 2rem;
+      max-width: 8.5rem;
+    }
   }
 </style>

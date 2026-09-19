@@ -2,22 +2,28 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
+import SocialProofStats from '../components/SocialProofStats.astro';
+import Stores from '../components/Stores.astro';
 import Offers from '../components/Offers.astro';
-import HowItWorks from '../components/HowItWorks.astro';
-import FinalCta from '../components/FinalCta.astro';
 import Testimonials from '../components/Testimonials.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Trust from '../components/Trust.astro';
+import FinalCta from '../components/FinalCta.astro';
 import Footer from '../components/Footer.astro';
 import StickyWhatsApp from '../components/StickyWhatsApp.astro';
 ---
 
-<BaseLayout>
+<BaseLayout showOffersBanner={false}>
   <Header />
   <main id="conteudo-principal">
     <Hero />
+    <SocialProofStats />
+    <Stores />
     <Offers />
-    <HowItWorks />
-    <FinalCta />
     <Testimonials />
+    <HowItWorks />
+    <Trust />
+    <FinalCta />
   </main>
   <Footer />
   <StickyWhatsApp />
