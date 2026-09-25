@@ -198,11 +198,10 @@ function bindSeeAllOffers(): void {
 }
 
 function bindOfferCardClicks(): void {
-  const root = document.querySelector('[data-offers-root]');
-  if (!root || (root as HTMLElement).dataset.offerClickBound === 'true') return;
-  (root as HTMLElement).dataset.offerClickBound = 'true';
+  if (document.documentElement.dataset.offerClickBound === 'true') return;
+  document.documentElement.dataset.offerClickBound = 'true';
 
-  root.addEventListener('click', (event) => {
+  document.addEventListener('click', (event) => {
     const target = event.target as HTMLElement | null;
     const link = target?.closest<HTMLAnchorElement>('[data-track="offer-card"]');
     if (!link) return;
@@ -210,6 +209,7 @@ function bindOfferCardClicks(): void {
     if (!href || href === '#') return;
     trackCustom('OfferCardClick', {
       loja: link.querySelector('[data-offer-store]')?.textContent ?? '',
+      source: link.closest('[data-hero-mockup]') ? 'hero' : 'offers',
     });
   });
 }

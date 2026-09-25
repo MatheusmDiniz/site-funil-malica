@@ -38,6 +38,8 @@ export const LANDING_COPY = {
   offersProofSubtitle:
     'Achadinhos reais para a rotina do bebê — preços podem mudar',
   offersSeeAll: 'Ver todos os achadinhos',
+  navHome: 'Início',
+  navAllOffers: 'Ver todas as ofertas',
   offersDisclaimer:
     '*Preços encontrados no momento da publicação e sujeitos a alteração.',
   offerSecondaryCta: 'Ver oferta',

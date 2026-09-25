@@ -20,7 +20,7 @@ import WhatsAppCta from './WhatsAppCta.astro';
       <p class="hero__trust">{LANDING_COPY.trustMicrocopy}</p>
     </div>
 
-    <div class="hero__visual" aria-hidden="true">
+    <div class="hero__visual">
       <div class="hero__phone" data-hero-mockup>
         <img
           class="hero__mascot"
@@ -30,19 +30,28 @@ import WhatsAppCta from './WhatsAppCta.astro';
           height="160"
           fetchpriority="high"
           decoding="async"
+          aria-hidden="true"
         />
-        <div class="hero__phone-notch"></div>
+        <div class="hero__phone-notch" aria-hidden="true"></div>
         <div class="hero__phone-screen">
-          <p class="hero__chat-header">Malica</p>
+          <p class="hero__chat-header" aria-hidden="true">Malica</p>
 
           <!-- Slot 1: estável em altura — brand ou oferta real -->
           <div class="hero__slot" data-hero-slot="0">
-            <div class="hero__bubble hero__bubble--brand" data-slot-brand>
+            <div class="hero__bubble hero__bubble--brand" data-slot-brand aria-hidden="true">
               <span class="hero__bubble-label">Malica</span>
               <p>Achadinho encontrado</p>
               <p class="hero__bubble-meta">Oferta no grupo</p>
             </div>
-            <div class="hero__bubble hero__bubble--offer" data-slot-offer hidden>
+            <a
+              class="hero__bubble hero__bubble--offer"
+              data-slot-offer
+              data-track="offer-card"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              hidden
+            >
               <div class="hero__bubble-row">
                 <img
                   class="hero__bubble-img"
@@ -60,17 +69,25 @@ import WhatsAppCta from './WhatsAppCta.astro';
                 </div>
               </div>
               <p class="hero__bubble-meta">Oferta encontrada pela Malica</p>
-            </div>
+            </a>
           </div>
 
           <!-- Slot 2: estável -->
           <div class="hero__slot" data-hero-slot="1">
-            <div class="hero__bubble hero__bubble--brand" data-slot-brand>
+            <div class="hero__bubble hero__bubble--brand" data-slot-brand aria-hidden="true">
               <span class="hero__bubble-label">Malica</span>
               <p>Novas promoções ao longo do dia</p>
               <p class="hero__bubble-meta">Direto no WhatsApp</p>
             </div>
-            <div class="hero__bubble hero__bubble--offer" data-slot-offer hidden>
+            <a
+              class="hero__bubble hero__bubble--offer"
+              data-slot-offer
+              data-track="offer-card"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              hidden
+            >
               <div class="hero__bubble-row">
                 <img
                   class="hero__bubble-img"
@@ -88,7 +105,7 @@ import WhatsAppCta from './WhatsAppCta.astro';
                 </div>
               </div>
               <p class="hero__bubble-meta">Oferta encontrada pela Malica</p>
-            </div>
+            </a>
           </div>
         </div>
       </div>
@@ -118,14 +135,21 @@ import WhatsAppCta from './WhatsAppCta.astro';
       const slot = document.querySelector<HTMLElement>(`[data-hero-slot="${i}"]`);
       if (!slot) return;
       const brand = slot.querySelector<HTMLElement>('[data-slot-brand]');
-      const bubble = slot.querySelector<HTMLElement>('[data-slot-offer]');
+      const bubble = slot.querySelector<HTMLAnchorElement>('[data-slot-offer]');
       const name = bubble?.querySelector<HTMLElement>('[data-mockup-name]');
       const price = bubble?.querySelector<HTMLElement>('[data-mockup-price]');
       const img = bubble?.querySelector<HTMLImageElement>('[data-mockup-img]');
       if (!bubble || !name || !price || !brand) return;
 
-      name.textContent = presentOfferTitle(offer.titulo, 42);
+      const displayTitle = presentOfferTitle(offer.titulo, 42);
+      const affiliate = offer.link?.trim() ?? '';
+      if (!affiliate) return;
+
+      name.textContent = displayTitle;
       price.textContent = `De ${formatBRL(offer.preco_anterior!)} por ${formatBRL(offer.preco!)}`;
+
+      bubble.href = affiliate;
+      bubble.setAttribute('aria-label', `Ver oferta: ${displayTitle}`);
 
       if (img && offer.imagem?.trim()) {
         img.src = offer.imagem.trim();
@@ -287,6 +311,23 @@ import WhatsAppCta from './WhatsAppCta.astro';
     text-align: left;
     min-height: 4.5rem;
     box-sizing: border-box;
+  }
+
+  a.hero__bubble--offer {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  a.hero__bubble--offer:hover {
+    background: rgba(139, 170, 157, 0.24);
+  }
+
+  a.hero__bubble--offer:focus-visible {
+    outline: 2px solid var(--malica-verde-salvia);
+    outline-offset: 2px;
   }
 
   .hero__bubble[hidden] {

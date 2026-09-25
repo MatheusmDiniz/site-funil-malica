@@ -6,7 +6,7 @@ export type FeedOffer = {
   preco: number | null;
   preco_anterior: number | null;
   loja: string;
-  /** Preservado internamente — cards não navegam para a loja. */
+  /** URL afiliada — cards e bolhas do hero abrem na loja. */
   link?: string;
   atualizado_em?: string;
   /** Só exibido se vier no JSON — nunca calculamos no front. */
@@ -33,9 +33,13 @@ const PLACEHOLDER_IMAGE = '/images/malica-mascote.png';
 const DEFAULT_PREVIEW_LIMIT = 3;
 const DEFAULT_CATALOG_PAGE = 12;
 const DEFAULT_CATALOG_MAX = 100;
-/** Home: só 3 hits de prova (sem grid extra). */
+/**
+ * Home: top 3–5 por economia em R$ (hero fica com 1–2).
+ * previewLimit = quantos exibir; rank pula os 2 primeiros.
+ */
 const DEFAULT_PREVIEW_MAX = 3;
-/** Candidatos recentes para soft-rank na home (exibe só catalogMax). */
+const HOME_HERO_SKIP = 2;
+/** Candidatos recentes para rank por economia em R$ na home (exibe só catalogMax). */
 const HOME_RANK_POOL = 48;
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -169,192 +173,85 @@ export function presentOfferTitle(raw: string, max = 52): string {
   return truncateTitle(t.replace(/\s{2,}/g, ' ').trim(), max);
 }
 
-const BABY_CATEGORY_HINTS = [
-  'bebe',
-  'bebê',
-  'fralda',
-  'mamadeira',
-  'lenco',
-  'lenço',
-  'leite',
-  'formula',
-  'fórmula',
-  'higiene',
-  'shampoo',
-  'sabonete',
-  'pomada',
-  'chupeta',
-  'carrinho',
-  'berco',
-  'berço',
-  'crianca',
-  'criança',
-  'kids',
-  'baby',
-  'gestante',
-  'mamae',
-  'mamãe',
-  'gestacao',
-  'gestação',
-  'body',
-  'macacao',
-  'macacão',
-  'roupa',
-  'enxoval',
-  'mijao',
-  'mijão',
-  'calcinha',
-  'cueca',
-];
-
-const DEMOTE_HINTS = [
-  'estria',
-  'celulite',
-  'emagrec',
-  'adulto',
-  'vinho',
-  'cerveja',
-  'pop it',
-  'popit',
-  'girafa',
-  'melman',
-  'brinquedo',
-  'toy',
-  'lancador',
-  'lançador',
-  'aviao',
-  'avião',
-  'bolha',
-  // Hero/home: evitar “hit caro” fora da rotina do H1
-  'barbie',
-  'boneca',
-  'patinete',
-  'travel system',
-  'travel',
-  'carrinho de bebe 3 em 1',
-];
-
-/** Pontuação mais alta para cotidiano bebê/mãe; brinquedos caem no extra. */
-function babyAffinityScore(offer: FeedOffer): number {
-  const cat = normalizeText(offer.categoria ?? '');
-  const title = normalizeText(offer.titulo);
-  let score = 0;
-
-  const dailyBoost = [
-    'fralda',
-    'leite',
-    'formula',
-    'lenco',
-    'higiene',
-    'mamadeira',
-    'pomada',
-    'shampoo',
-    'sabonete',
-    'body',
-    'macacao',
-    'enxoval',
-    'huggies',
-    'pampers',
-  ];
-
-  for (const hint of BABY_CATEGORY_HINTS) {
-    const n = normalizeText(hint);
-    if (cat.includes(n)) score += 5;
-    else if (title.includes(n)) score += 2;
-  }
-
-  // "infantil" sozinho é fraco (aparece em brinquedo); só ajuda se já há sinal baby
-  if (title.includes('infantil') || cat.includes('infantil')) {
-    score += score > 0 ? 2 : 0;
-  }
-
-  for (const hint of dailyBoost) {
-    const n = normalizeText(hint);
-    if (cat.includes(n) || title.includes(n)) score += 4;
-  }
-
-  for (const hint of DEMOTE_HINTS) {
-    const n = normalizeText(hint);
-    if (cat.includes(n)) score -= 8;
-    else if (title.includes(n)) score -= 7;
-  }
-  return score;
-}
-
-/** Economia absoluta em R$ (0 se inválida). */
-function absoluteSavings(offer: FeedOffer): number {
+/** Economia absoluta em R$ (preço anterior − preço atual). */
+function getSavingsValue(offer: FeedOffer): number | null {
   const price = offer.preco;
   const prev = offer.preco_anterior;
   if (
-    price != null &&
-    prev != null &&
-    Number.isFinite(price) &&
-    Number.isFinite(prev) &&
-    prev > price
+    price == null ||
+    prev == null ||
+    !Number.isFinite(price) ||
+    !Number.isFinite(prev) ||
+    prev <= price
   ) {
-    return prev - price;
+    return null;
   }
-  return 0;
+  return prev - price;
+}
+
+/** Ordena por maior economia em R$; empate → mais recente. */
+function compareBySavingsDesc(a: FeedOffer, b: FeedOffer): number {
+  const sa = getSavingsValue(a);
+  const sb = getSavingsValue(b);
+  if (sa == null && sb == null) {
+    const ta = getUpdatedAt(a);
+    const tb = getUpdatedAt(b);
+    if (ta == null && tb == null) return 0;
+    if (ta == null) return 1;
+    if (tb == null) return -1;
+    return tb - ta;
+  }
+  if (sa == null) return 1;
+  if (sb == null) return -1;
+  if (sb !== sa) return sb - sa;
+  const ta = getUpdatedAt(a);
+  const tb = getUpdatedAt(b);
+  if (ta == null && tb == null) return 0;
+  if (ta == null) return 1;
+  if (tb == null) return -1;
+  return tb - ta;
+}
+
+/** Home: maiores economias em R$ em sequência. */
+function rankBySavings<T extends FeedOffer>(offers: T[]): T[] {
+  return offers.slice().sort(compareBySavingsDesc);
+}
+
+/** Ordena por maior % de desconto; empate → mais recente. */
+function compareByDiscountDesc(a: FeedOffer, b: FeedOffer): number {
+  const da = getDiscountValue(a);
+  const db = getDiscountValue(b);
+  if (da == null && db == null) {
+    const ta = getUpdatedAt(a);
+    const tb = getUpdatedAt(b);
+    if (ta == null && tb == null) return 0;
+    if (ta == null) return 1;
+    if (tb == null) return -1;
+    return tb - ta;
+  }
+  if (da == null) return 1;
+  if (db == null) return -1;
+  if (db !== da) return db - da;
+  const ta = getUpdatedAt(a);
+  const tb = getUpdatedAt(b);
+  if (ta == null && tb == null) return 0;
+  if (ta == null) return 1;
+  if (tb == null) return -1;
+  return tb - ta;
+}
+
+/** Hero mockup: maiores % OFF em sequência. */
+function rankByDiscount<T extends FeedOffer>(offers: T[]): T[] {
+  return offers.slice().sort(compareByDiscountDesc);
 }
 
 /**
- * Home ranking: relevância bebê/mãe primeiro; desempate por economia (R$)
- * e % OFF — prioriza “hits” sem inventar urgência.
- */
-function softRankForHome(offers: OfferWithMeta[]): OfferWithMeta[] {
-  return offers
-    .map((o, i) => ({
-      o,
-      i,
-      score: babyAffinityScore(o),
-      savings: absoluteSavings(o),
-      pct: getDiscountValue(o) ?? 0,
-    }))
-    .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      if (b.savings !== a.savings) return b.savings - a.savings;
-      if (b.pct !== a.pct) return b.pct - a.pct;
-      return a.i - b.i;
-    })
-    .map((x) => x.o);
-}
-
-/**
- * 2 achados para o mockup do hero.
- * Prioridade: rotina bebê/mãe (alinha ao H1) → desconto forte entre esses.
- * Só cai para “maior R$ off” genérico se não houver ofertas de rotina.
+ * Achados para o mockup do hero — top N com maior % de desconto.
  */
 export function getHeroMockupOffers(limit = 2): FeedOffer[] {
   const pool = getLoadedOffers();
   if (pool.length === 0) return [];
-
-  const ranked = pool
-    .map((o, i) => {
-      const savings = absoluteSavings(o);
-      const pct = getDiscountValue(o) ?? 0;
-      const score = babyAffinityScore(o);
-      return {
-        o,
-        i,
-        savings,
-        pct,
-        score,
-        routine: score > 0 ? 1 : 0,
-        strong: savings >= 15 || pct >= 20 ? 1 : 0,
-      };
-    })
-    .sort((a, b) => {
-      if (b.routine !== a.routine) return b.routine - a.routine;
-      if (b.score !== a.score) return b.score - a.score;
-      if (b.strong !== a.strong) return b.strong - a.strong;
-      if (b.savings !== a.savings) return b.savings - a.savings;
-      if (b.pct !== a.pct) return b.pct - a.pct;
-      return a.i - b.i;
-    });
-
-  const routineHits = ranked.filter((x) => x.score > 0);
-  const pickFrom = routineHits.length >= limit ? routineHits : ranked;
-  return pickFrom.slice(0, limit).map((x) => x.o);
+  return rankByDiscount(pool).slice(0, limit);
 }
 
 function setVisible(el: HTMLElement | null, visible: boolean): void {
@@ -724,7 +621,7 @@ function buildGrid(root: HTMLElement): void {
   const feedCta = root.querySelector<HTMLElement>('[data-offers-cta]');
   const emptyFilter = root.querySelector<HTMLElement>('[data-offers-filter-empty]');
   const actionLabel = root.dataset.offerActionLabel?.trim() || 'Ver oferta';
-  // Preview home: prova ranqueada (até previewLimit). Catálogo usa o fluxo abaixo.
+  // Preview home: top N por % OFF. Catálogo usa o fluxo abaixo.
   const isProofHome = config.mode === 'preview';
 
   if (!grid || !cardTpl) return;
@@ -732,8 +629,11 @@ function buildGrid(root: HTMLElement): void {
   const filtered = getFilteredOffers();
 
   if (isProofHome) {
-    const ranked = softRankForHome(filtered);
-    const proofOffers = ranked.slice(0, Math.min(config.previewLimit, config.catalogMax));
+    // Top 5 por R$: hero usa 1–2; esta seção mostra 3–5.
+    const ranked = rankBySavings(filtered);
+    const start = HOME_HERO_SKIP;
+    const end = start + Math.min(config.previewLimit, config.catalogMax);
+    const proofOffers = ranked.slice(start, end);
 
     fillGrid(grid, cardTpl, proofOffers, 0, {
       proof: true,
@@ -1012,8 +912,8 @@ async function loadOffersFeedInternal(url: string): Promise<void> {
       return;
     }
 
-    // Preview home: carrega pool maior para soft-rank (relevância + economia),
-    // depois a UI mostra só até catalogMax (= 3 na home).
+    // Preview home: carrega pool maior para rank por economia em R$,
+    // depois a UI mostra posições 3–5 (catalogMax = 3 na home).
     const poolSize =
       config.mode === 'preview'
         ? Math.max(config.catalogMax, HOME_RANK_POOL)

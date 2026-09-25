@@ -1,3 +1,11 @@
+---
+import { LANDING_COPY } from '../config/site';
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isHome = path === '/' || path === '/index.html';
+const isAchadinhos = path === '/achadinhos';
+---
+
 <header class="header">
   <div class="container header__inner">
     <a href="/" class="header__logo" aria-label="Malica — página inicial">
@@ -9,39 +17,115 @@
         fetchpriority="high"
       />
     </a>
+
+    <nav class="header__nav" aria-label="Principal">
+      <a
+        href="/"
+        class:list={['header__nav-link', { 'header__nav-link--active': isHome }]}
+        aria-current={isHome ? 'page' : undefined}
+      >
+        {LANDING_COPY.navHome}
+      </a>
+      <a
+        href="/achadinhos"
+        class:list={[
+          'header__nav-link',
+          { 'header__nav-link--active': isAchadinhos },
+        ]}
+        data-track="see-all-offers"
+        aria-current={isAchadinhos ? 'page' : undefined}
+      >
+        {LANDING_COPY.navAllOffers}
+      </a>
+    </nav>
   </div>
 </header>
 
-<style>
+<style is:global>
   .header {
     padding-block: 0.55rem 0.25rem;
   }
 
-  .header__inner {
+  .header .header__inner {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 2.75rem;
+    gap: 1rem;
   }
 
-  .header__logo {
+  .header .header__logo {
     display: inline-flex;
+    flex-shrink: 0;
+    margin-right: auto;
     text-decoration: none;
   }
 
-  .header__logo:focus-visible {
+  .header .header__logo:focus-visible {
     outline: 2px solid var(--malica-verde-salvia);
     outline-offset: 3px;
     border-radius: 4px;
   }
 
-  .header__logo img {
+  .header .header__logo img {
     width: auto;
-    height: 2.5rem; /* ~40px — marca legível no mobile */
+    height: 2.5rem;
     object-fit: contain;
   }
 
+  .header .header__nav {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .header .header__nav-link {
+    display: inline-block;
+    font-family: var(--malica-font-body);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--malica-text-muted);
+    text-decoration: none;
+    padding: 0.35rem 0;
+    border-bottom: 1.5px solid transparent;
+    white-space: nowrap;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .header .header__nav-link + .header__nav-link {
+    margin-left: 1.25rem;
+  }
+
+  .header .header__nav-link:hover {
+    color: var(--malica-marrom-ameixa);
+  }
+
+  .header .header__nav-link--active {
+    color: var(--malica-marrom-ameixa);
+    border-bottom-color: var(--malica-verde-salvia);
+  }
+
+  .header .header__nav-link:focus-visible {
+    outline: 2px solid var(--malica-verde-salvia);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
   @media (min-width: 640px) {
-    .header__logo img {
+    .header .header__logo img {
       height: 2.85rem;
+    }
+
+    .header .header__nav-link {
+      font-size: 0.9375rem;
+    }
+
+    .header .header__nav-link + .header__nav-link {
+      margin-left: 1.75rem;
     }
   }
 </style>
