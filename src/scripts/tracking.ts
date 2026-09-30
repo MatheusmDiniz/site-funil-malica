@@ -6,9 +6,9 @@ function getMetaPixelId(): string {
   return document.body.dataset.metaPixelId ?? '';
 }
 
-function isHomePath(): boolean {
+function isPageViewPath(): boolean {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
-  return path === '/' || path === '/index.html';
+  return path === '/' || path === '/index.html' || path === '/grupo';
 }
 
 function loadMetaPixel(pixelId: string): void {
@@ -39,8 +39,8 @@ function loadMetaPixel(pixelId: string): void {
   document.head.appendChild(script);
 
   window.fbq('init', pixelId);
-  // PageView só na home — /achadinhos já tem OffersCatalogView
-  if (isHomePath()) {
+  // PageView só na home e em /grupo — /achadinhos já tem OffersCatalogView
+  if (isPageViewPath()) {
     window.fbq('track', 'PageView');
   }
 }
@@ -61,7 +61,8 @@ type CtaPosition =
   | 'how_it_works'
   | 'sticky'
   | 'final'
-  | 'banner';
+  | 'banner'
+  | 'grupo';
 
 const CTA_POSITIONS = new Set<string>([
   'hero',
@@ -71,6 +72,7 @@ const CTA_POSITIONS = new Set<string>([
   'sticky',
   'final',
   'banner',
+  'grupo',
 ]);
 
 function parseCtaPosition(value: string | undefined): CtaPosition | undefined {

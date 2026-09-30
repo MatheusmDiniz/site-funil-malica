@@ -80,6 +80,15 @@ Ordem em `src/pages/index.astro`:
 
 Rotas legais: `/politica-de-privacidade`, `/termos-de-uso`.
 
+### Página de captura `/grupo`
+
+`src/pages/grupo.astro` — página curta estilo "grupo VIP" para anúncios, **isolada** (sem links a partir da home ou de `/achadinhos`, com `noindex`). Copy e flags em `GRUPO_COPY` (`site.ts`).
+
+- **Vagas reais:** `groupCapacity (1024) - groupMembers`. Manter `groupMembers` atualizado com o número real do grupo; quando lotar, trocar `PUBLIC_WHATSAPP_GROUP_URL` para um grupo novo e recomeçar a contagem.
+- **Contador real:** conta até a meia-noite de Brasília ("Os achadinhos de hoje acabam em"); igual para todos, não reinicia ao recarregar.
+- Desligar com `showCountdown` / `showSpots`. Nunca usar contador que reinicia ou vagas inventadas.
+- CTA com `ctaPosition="grupo"`; `PageView` também dispara nessa rota.
+
 CTA único: `src/components/WhatsAppCta.astro` (`data-track="whatsapp-group"`). Texto sugerido: “Entrar no grupo gratuito”. Min-height ≥ 48px, ícone WhatsApp, focus visível.
 
 ## Regras obrigatórias (não negociar)

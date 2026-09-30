@@ -54,6 +54,40 @@ export const LANDING_COPY = {
   finalFine: 'É grátis e leva poucos segundos.',
 } as const;
 
+/**
+ * Copy da página de captura /grupo (isolada, destino de anúncio).
+ * Vagas e contador precisam refletir a realidade: atualize `groupMembers`
+ * com o número real de membros do grupo atual do link PUBLIC_WHATSAPP_GROUP_URL.
+ */
+export const GRUPO_COPY = {
+  seoTitle: 'Grupo VIP de Promoções para Bebês | Malica',
+  seoDescription:
+    'Entre grátis no grupo VIP da Malica e receba no WhatsApp promoções e cupons de fraldas, roupinhas e achadinhos para bebês.',
+  badge: 'GRUPO VIP DE PROMOÇÕES E CUPONS',
+  headline: 'Economize de verdade no enxoval do seu bebê',
+  subtitle:
+    'Fraldas, roupinhas e achadinhos com os melhores preços, direto no seu WhatsApp.',
+  socialProofSuffix: 'mamães e papais economizando',
+  cta: 'ENTRAR NO GRUPO AGORA',
+  ctaFine: 'Grátis · Leva poucos segundos · Saia quando quiser',
+  checklist: [
+    { emoji: '💚', text: 'Grupo 100% gratuito' },
+    { emoji: '⚡', text: 'Ofertas relâmpago (as promoções acabam rápido)' },
+    { emoji: '🎟️', text: 'Cupons testados e descontos de verdade' },
+    { emoji: '🔒', text: 'Só a equipe Malica posta — sem spam' },
+  ],
+  countdownLabel: 'Os achadinhos de hoje acabam em',
+  /** Atualizar manualmente com o número real de membros do grupo atual. */
+  groupMembers: 180,
+  /** Limite de membros de um grupo do WhatsApp. */
+  groupCapacity: 1024,
+  showCountdown: true,
+  showSpots: true,
+  trustTitle: 'É confiável?',
+  trustText:
+    'Sim! Só a equipe Malica envia ofertas no grupo, sempre com links das lojas oficiais. Você pode sair quando quiser.',
+} as const;
+
 export interface Testimonial {
   name: string;
   text: string;
